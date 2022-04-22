@@ -23,42 +23,18 @@ public class Main {
         rullesumm på init så kan man klippe litt et par gang som gjør den bedre
          */
 
-        //        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
-        File imagefp = new File("./training_images/training_images/test/test_img.png");
+        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
+
+        //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
+        //        File imagefp = new File("./training_images/training_images/test/test_img.png");
         //        File imagefp = new File("./training_images/training_images/test/test_img_shitty_compressed.jpg");
         try {
             Image                   image             = new Image(imagefp);
-            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 4, 2, 0.2, 0.7, image);
+            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
 
-            var ph = genteticAlgorithm.runGenalg(100);
-            //            Genotype genotype = Initialization.generateInitialGenome(image);
-            //            var      ph       = new Phenotype(genotype, image);
-            //            var      cr       = new Criterion(image);
-            //            dbl.log("edge val ", cr.phenotypeEdgeValue(ph));
-            //            dbl.log("con mes ", cr.phenotypeConnectivityMeasure(ph));
-            //            dbl.log("diviation", cr.phenotypeOverallDeviation(ph));
-
-
-            //            System.out.println(Arrays.toString(ph.pixelGroupList));
-
-            for (int i = 0; i < image.height; i++) {
-                System.out.println(Arrays.toString(Arrays.copyOfRange(ph.genome,
-                                                                      i * image.width,
-                                                                      (i + 1) * image.width
-                                                                     )));
-
-
-            }
+            var ph = genteticAlgorithm.runGenalg(300);
 
             image.savePixelGroupEdgeDisplay(ph);
-            for (int i = 0; i < image.height; i++) {
-                System.out.println(Arrays.toString(Arrays.copyOfRange(ph.pixelGroupList,
-                                                                      i * image.width,
-                                                                      (i + 1) * image.width
-                                                                     )));
-
-
-            }
 
 
         } catch (FileNotFoundException e) {

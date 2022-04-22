@@ -12,11 +12,11 @@ import java.util.stream.Stream;
 public class PrimsAlgorithm {
 
     private static DebugLogger dbl = new DebugLogger(false);
-    private static List<PixelConnectionType> connectionTypes = List.of(PixelConnectionType.UP,
-                                                                       PixelConnectionType.DOWN,
-                                                                       PixelConnectionType.LEFT,
-                                                                       PixelConnectionType.RIGHT
-                                                                      );
+    private static List<PixelConnectionType> connectionTypes = new ArrayList<>(List.of(PixelConnectionType.UP,
+                                                                                       PixelConnectionType.DOWN,
+                                                                                       PixelConnectionType.LEFT,
+                                                                                       PixelConnectionType.RIGHT
+                                                                                      ));
     private PriorityQueue<GraphEdge> edgesQue = new PriorityQueue<>();
     private Image image;
     private PixelConnectionType[] currentState;
@@ -52,10 +52,17 @@ public class PrimsAlgorithm {
         //        dbl.log(Arrays.copyOfRange(this.currentState, 50, 100));
         //        System.exit(0);
 
+        int n = 0;
         while (! edgesQue.isEmpty()) {
+            n++;
             GraphEdge minEdge = edgesQue.remove();
 
             tryConnectEdge(minEdge);
+            //            if (n > 100) {
+            //                currentState[minEdge.fromNode] = PixelConnectionType.SELF;
+            //                                                 n = 0;
+            //            }
+
         }
         return currentState;
     }
@@ -104,6 +111,7 @@ public class PrimsAlgorithm {
     private void addNode(int nodeId) {
 
         Point nodePos = image.getIdAsPoint(nodeId);
+        Collections.shuffle(connectionTypes);
         for (var conn : connectionTypes) {
             int newX = nodePos.x;
             int newY = nodePos.y;

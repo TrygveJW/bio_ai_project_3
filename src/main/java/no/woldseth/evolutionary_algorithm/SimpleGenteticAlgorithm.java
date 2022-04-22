@@ -109,7 +109,7 @@ public class SimpleGenteticAlgorithm {
     private Genotype genChild(Genotype parent1, Genotype parent2) {
         Genotype child;
         if (rng.nextDouble() < crossChance) {
-            //            child = crossover.uniformCrossover(parent1, parent2, 0.1);
+            //            child = crossover.uniformCrossover(parent1, parent2, 0.5);
             //            child = crossover.twoPointCross(parent1, parent2);
             child = crossover.twoPointCross2d(parent1, parent2);
         } else {
@@ -158,7 +158,7 @@ public class SimpleGenteticAlgorithm {
     }
 
 
-    private double deviationWeight = - 100 * 1;
+    private double deviationWeight = - 100 * 2;
     private double edgeValWeight = 0.01 * 1;
     private double connectivityWeight = - 1 * 3;
 
