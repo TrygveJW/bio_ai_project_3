@@ -1,20 +1,34 @@
 package no.woldseth.image;
 
-import java.lang.Math;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 public class Pixel {
-    public final int red;
-    public final int green;
-    public final int blue;
 
-    public PixelGroup pixelsGroup;
-    public boolean updated;
+    private final int id;
 
-    public Pixel(int red, int green, int blue) {
-        this.red   = red;
-        this.green = green;
-        this.blue  = blue;
-        this.updated = true;
+    private final int x;
+
+    private final int y;
+
+    private final int red;
+
+    private final int green;
+
+    private final int blue;
+
+    private final boolean is_edge;
+
+    public Pixel(int id, int x, int y, int red, int green, int blue, boolean is_edge) {
+        this.id      = id;
+        this.x       = x;
+        this.y       = y;
+        this.red     = red;
+        this.green   = green;
+        this.blue    = blue;
+        this.is_edge = is_edge;
     }
+
 
 }

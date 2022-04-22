@@ -1,13 +1,12 @@
 package no.woldseth.image;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class PixelGroup {
-    public HashSet<Pixel> groupMembers;
-    public HashSet<Pixel> updatedMembers;
+    public ArrayList<Pixel> groupMembers;
 
-    private int rDelta;
-    private int gDelta;
-    private int bDelta;
-
+    public PixelGroup() {
+        groupMembers = new ArrayList<>();
+    }
 }
