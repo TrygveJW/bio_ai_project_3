@@ -45,7 +45,7 @@ public class NSGA2 {
         this.numObjectives = 2;
     }
 
-    public void runGenalg(int numGenerations) {
+    public Phenotype runGenalg(int numGenerations) {
         // gen inital pop
         List<MOOEvaluatedPhenotype> population = this.evaluatedGenotypes(genInitialPopulation());
         for (int gen = 0; gen < numGenerations; gen++)
@@ -81,6 +81,7 @@ public class NSGA2 {
         // TODO: 28/04/2022 Fiks resten her Axel
         System.out.println(paretoFront.get(0).connectivity);
         System.out.println("skadoosh");
+        return paretoFront.get(0);
     }
 
     public void frontsToFile(List<List<MOOEvaluatedPhenotype>> m) {

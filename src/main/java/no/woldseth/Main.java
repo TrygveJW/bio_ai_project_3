@@ -31,13 +31,14 @@ public class Main {
         //        File imagefp = new File("./training_images/training_images/test/test_img_shitty_compressed.jpg");
         try {
             Image                   image             = new Image(imagefp);
+
+            //NSGA2 peeop = new NSGA2(100, 2, 2, 0.2, 0.7, image);
+            //var skadoosh = peeop.runGenalg(1000);
+            //image.savePixelGroupEdgeDisplay(skadoosh);
+
             SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
-            NSGA2 peeop = new NSGA2(50, 1, 2, 0.2, 0.7, image);
-            peeop.runGenalg(300);
-
-            //var ph = genteticAlgorithm.runGenalg(300);
-
-            //image.savePixelGroupEdgeDisplay(ph);
+            var ph = genteticAlgorithm.runGenalg(100);
+            image.savePixelGroupEdgeDisplay(ph);
 
 
         } catch (FileNotFoundException e) {
