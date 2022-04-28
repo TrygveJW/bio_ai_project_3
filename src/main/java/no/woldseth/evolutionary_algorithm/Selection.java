@@ -23,7 +23,7 @@ public class Selection {
         public Genotype parent2;
     }
 
-    private static final int tournamentSize = 5;
+    private static final int tournamentSize = 4;
 
     public static ParentPair tournamentParentSelection(List<? extends PhenoInterface> parentCandidates, boolean maximize) {
         List<? extends PhenoInterface> tournamentPool = rng.randomChoice(parentCandidates, tournamentSize, true);

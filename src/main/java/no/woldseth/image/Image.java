@@ -116,7 +116,11 @@ public class Image {
         //        Arrays.stream(pixels).forEach(ints -> System.out.println(Arrays.deepToString(ints)));
     }
 
-    public void savePixelGroupEdgeDisplay(Phenotype phenotype) {
+    public void saveGroundTruthImage(Phenotype phenotype, String filePath) {
+
+    }
+
+    public void savePixelGroupEdgeDisplay(Phenotype phenotype, String filePath) {
         try {
             Color borderColor = Color.magenta;
 
@@ -144,7 +148,7 @@ public class Image {
                 }
             });
 
-            File outFp = new File("./Segmented_file.png");
+            File outFp = new File(filePath + ".png");
             ImageIO.write(bufferedImage, "png", outFp);
 
         } catch (Exception e) {

@@ -24,7 +24,7 @@ public class Main {
         rullesumm på init så kan man klippe litt et par gang som gjør den bedre
          */
 
-        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
+        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
 
         //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
         //        File imagefp = new File("./training_images/training_images/test/test_img.png");
@@ -32,13 +32,19 @@ public class Main {
         try {
             Image                   image             = new Image(imagefp);
 
-            //NSGA2 peeop = new NSGA2(100, 2, 2, 0.2, 0.7, image);
-            //var skadoosh = peeop.runGenalg(1000);
-            //image.savePixelGroupEdgeDisplay(skadoosh);
+            NSGA2 peeop = new NSGA2(50, 25, 2, 0.12, 0.9, image);
+            var skadoosh = peeop.runGenalg(100);
+            int counter = 0;
+            for (Phenotype p : skadoosh)
+            {
+                image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
+                counter++;
+            }
 
-            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
-            var ph = genteticAlgorithm.runGenalg(100);
-            image.savePixelGroupEdgeDisplay(ph);
+
+            //SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
+            //var ph = genteticAlgorithm.runGenalg(100);
+            //image.savePixelGroupEdgeDisplay(ph);
 
 
         } catch (FileNotFoundException e) {

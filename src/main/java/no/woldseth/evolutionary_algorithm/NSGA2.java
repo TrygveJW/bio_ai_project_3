@@ -42,11 +42,11 @@ public class NSGA2 {
         this.criterion                = new Criterion(image);
         this.mutators                 = new Mutators(image);
         this.crossover                = new Crossover(image);
-        this.numObjectives = 2;
+        this.numObjectives = 3;
     }
 
-    public Phenotype runGenalg(int numGenerations) {
-        // gen inital pop
+    public List<? extends Phenotype> runGenalg(int numGenerations) {
+
         List<MOOEvaluatedPhenotype> population = this.evaluatedGenotypes(genInitialPopulation());
         for (int gen = 0; gen < numGenerations; gen++)
         {
@@ -59,9 +59,11 @@ public class NSGA2 {
             var fronts = fastNonDominatedSort(population);
             List<MOOEvaluatedPhenotype> next_gen = new ArrayList<>();
             int idx = 0;
-            if (fronts.size() > 1)
+            if (fronts.size() > 1) {
+                System.out.println("Pareto front length: " + fronts.get(0).size());
                 System.out.println("Num fronts: " + fronts.size());
-            crowdingDistanceAssignment(fronts.get(idx));
+            }
+            crowdingDistanceAssignment(fronts.get(idx));  // Ensures sorting even when first front too large
             while (next_gen.size() + fronts.get(idx).size() <= this.populationSize) {
                 crowdingDistanceAssignment(fronts.get(idx));
                 next_gen.addAll(fronts.get(idx));
@@ -81,7 +83,8 @@ public class NSGA2 {
         // TODO: 28/04/2022 Fiks resten her Axel
         System.out.println(paretoFront.get(0).connectivity);
         System.out.println("skadoosh");
-        return paretoFront.get(0);
+        frontsToFile(fastNonDominatedSort(population));
+        return paretoFront;
     }
 
     public void frontsToFile(List<List<MOOEvaluatedPhenotype>> m) {
@@ -149,7 +152,7 @@ public class NSGA2 {
 
         List<Selection.ParentPair> parents = new ArrayList<>();
         for (int i = 0; i < numParentPairs; i++) {
-            parents.add(Selection.tournamentParentSelection(population, true));
+            parents.add(Selection.tournamentParentSelection(population, false));
         }
         return parents;
     }
@@ -209,12 +212,12 @@ public class NSGA2 {
             // Garra en bedre måte å gjøre dette på
             int finalI = i;
             double f_max = sol_set.stream()
-                    .max((fc1, fc2) -> Double.compare(fc1.getFitnessValueByIdx(finalI), fc2.getFitnessValueByIdx(finalI)))
+                    .max(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI)))
                     .get().getFitnessValueByIdx(i);
 
             int finalI1 = i;
             double f_min = sol_set.stream()
-                    .min((fc1, fc2) -> Double.compare(fc1.getFitnessValueByIdx(finalI1), fc2.getFitnessValueByIdx(finalI1)))
+                    .min(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI1)))
                     .get().getFitnessValueByIdx(i);
 
             double fitDelta = (f_max - f_min);
@@ -223,7 +226,7 @@ public class NSGA2 {
             int finalI2 = i;
             //TODO: dobbelsjekk om listen skal være i motsatt rekkefølge eller ikke
             //sol_set.sort(Comparator.comparingDouble(o -> -o.getFitnessValueByIdx(finalI2)));
-            sol_set.sort(Collections.reverseOrder(Comparator.comparingDouble(o -> -o.getFitnessValueByIdx(finalI2))));
+            sol_set.sort(Collections.reverseOrder(Comparator.comparingDouble(o -> o.getFitnessValueByIdx(finalI2))));
             sol_set.get(0).setCrowdingDist(Double.POSITIVE_INFINITY);
             sol_set.get(end).setCrowdingDist(Double.POSITIVE_INFINITY);
 
