@@ -27,6 +27,20 @@ public class Initialization {
         return new Genotype(genome);
     }
 
+    public static Genotype generateRandomGenome(Image image) {
+                PixelConnectionType[] genome = Arrays.stream(image.pixleArray)
+                                                    .map(pixel -> getPixelBestConnection(pixel, image))
+                                                     .toArray(PixelConnectionType[]::new);
+
+
+                //Random                rng    = new Random();
+                //for (int i = 0; i < 10; i++) {
+                //    genome[rng.nextInt(genome.length)] = PixelConnectionType.SELF;
+
+                //}
+        return new Genotype(genome);
+    }
+
     private static List<PixelConnectionType> connectionTypes = List.of(PixelConnectionType.UP,
                                                                        PixelConnectionType.DOWN,
                                                                        PixelConnectionType.LEFT,

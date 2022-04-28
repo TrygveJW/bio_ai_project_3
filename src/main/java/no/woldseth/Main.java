@@ -35,9 +35,9 @@ public class Main {
             NSGA2 peeop = new NSGA2(50, 1, 2, 0.2, 0.7, image);
             peeop.runGenalg(300);
 
-            var ph = genteticAlgorithm.runGenalg(300);
+            //var ph = genteticAlgorithm.runGenalg(300);
 
-            image.savePixelGroupEdgeDisplay(ph);
+            //image.savePixelGroupEdgeDisplay(ph);
 
 
         } catch (FileNotFoundException e) {

@@ -14,7 +14,7 @@ import java.util.*;
 
 public class NSGA2 {
 
-    private static final Random rng = new Random(42);
+    private static final Random rng = new Random();
 
     private final int populationSize;
     private final int numParentPairs;
@@ -59,7 +59,11 @@ public class NSGA2 {
             var fronts = fastNonDominatedSort(population);
             List<MOOEvaluatedPhenotype> next_gen = new ArrayList<>();
             int idx = 0;
+            if (fronts.size() > 1)
+                System.out.println("Num fronts: " + fronts.size());
+            crowdingDistanceAssignment(fronts.get(idx));
             while (next_gen.size() + fronts.get(idx).size() <= this.populationSize) {
+                crowdingDistanceAssignment(fronts.get(idx));
                 next_gen.addAll(fronts.get(idx));
                 idx++;
             }
@@ -71,10 +75,12 @@ public class NSGA2 {
                 next_gen.add(iterator.next());
 
             population = next_gen;
-
+            System.out.println("Gen number " + gen);
         }
         var paretoFront = fastNonDominatedSort(population).get(0);
         // TODO: 28/04/2022 Fiks resten her Axel
+        System.out.println(paretoFront.get(0).connectivity);
+        System.out.println("skadoosh");
     }
 
     public void frontsToFile(List<List<MOOEvaluatedPhenotype>> m) {
@@ -211,11 +217,12 @@ public class NSGA2 {
                     .get().getFitnessValueByIdx(i);
 
             double fitDelta = (f_max - f_min);
-            double fitDeltaInverse = fitDelta > 0.0 ? 1 / fitDelta : Double.POSITIVE_INFINITY;
+            double fitDeltaInverse = fitDelta > 0.0 ? (1 / fitDelta) : Double.POSITIVE_INFINITY;
 
             int finalI2 = i;
             //TODO: dobbelsjekk om listen skal være i motsatt rekkefølge eller ikke
-            sol_set.sort(Comparator.comparingDouble(o -> -o.getFitnessValueByIdx(finalI2)));
+            //sol_set.sort(Comparator.comparingDouble(o -> -o.getFitnessValueByIdx(finalI2)));
+            sol_set.sort(Collections.reverseOrder(Comparator.comparingDouble(o -> -o.getFitnessValueByIdx(finalI2))));
             sol_set.get(0).setCrowdingDist(Double.POSITIVE_INFINITY);
             sol_set.get(end).setCrowdingDist(Double.POSITIVE_INFINITY);
 
@@ -272,6 +279,7 @@ public class NSGA2 {
         List<Genotype> initialPopulation = new ArrayList<>();
         for (int i = 0; i < this.populationSize; i++) {
             initialPopulation.add(Initialization.generateInitialGenome(image));
+            //initialPopulation.add(Initialization.generateRandomGenome(image));
         }
         return initialPopulation;
     }
