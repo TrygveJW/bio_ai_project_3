@@ -34,7 +34,7 @@ public class PrimsAlgorithm {
         this.image          = image;
         this.currentState   = new PixelConnectionType[image.numPixels];
         this.counter        = 0;
-        this.counterSelfSet = image.numPixels / 5;
+        this.counterSelfSet = 200;
         this.edgeList       = new ArrayList<>(image.numPixels * 2);
         //        Arrays.fill(currentState, PixelConnectionType.SELF);
     }
@@ -129,12 +129,12 @@ public class PrimsAlgorithm {
             throw new RuntimeException();
         }
 
-        //        if (this.counter > counterSelfSet) {
-        //            connectionType = PixelConnectionType.SELF;
-        //            this.counter   = 0;
-        //        } else {
-        //            this.counter += 1;
-        //        }
+             //   if (this.counter > counterSelfSet) {
+             //       connectionType = PixelConnectionType.SELF;
+             //       this.counter   = 0;
+             //   } else {
+             //       this.counter += 1;
+             //   }
 
         currentState[from] = connectionType;
 

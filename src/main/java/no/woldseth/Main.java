@@ -34,11 +34,11 @@ public class Main {
         try {
             Image image = new Image(imagefp);
 
-            //            var a = Initialization.generateInitialGenome(image);
-            //            image.savePixelGroupEdgeDisplay(new Phenotype(a, image), "./init_test_img");
-            //            System.exit(0);
+                        //var a = Initialization.generateInitialGenome(image);
+                        //image.savePixelGroupEdgeDisplay(new Phenotype(a, image), "./init_test_img");
+                        //System.exit(0);
 
-            NSGA2 peeop    = new NSGA2(50, 2, 4, 0.2, 0.7, image);
+            NSGA2 peeop    = new NSGA2(25, 2, 2, 0.2, 0.7, image);
             var   skadoosh = peeop.runGenalg(50);
             int   counter  = 0;
             for (Phenotype p : skadoosh) {

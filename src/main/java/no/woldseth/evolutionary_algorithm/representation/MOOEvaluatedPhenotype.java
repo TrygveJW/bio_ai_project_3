@@ -75,7 +75,6 @@ public class MOOEvaluatedPhenotype extends Phenotype implements PhenoInterface {
 
     public void setCrowdingDist(double crowdingDist) {
         this.crowdingDist = crowdingDist;
-
     }
 
     @Override
