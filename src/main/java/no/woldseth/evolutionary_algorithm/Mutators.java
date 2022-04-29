@@ -34,13 +34,13 @@ public class Mutators {
                     this.simpleGeneFlipMutation(genotype);
                 }
                 case 1 -> {
-                    this.horisontalLineMutation(genotype);
+                    this.mergeGroupMutation(genotype, image);
                 }
                 case 2 -> {
                     this.verticalLineMutation(genotype);
                 }
                 case 3 -> {
-                    this.mergeGroupMutation(genotype, image);
+                    this.horisontalLineMutation(genotype);
                 }
                 default -> {
                     throw new RuntimeException();

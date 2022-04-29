@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.stream.Collectors;
@@ -156,4 +157,55 @@ public class Image {
         }
     }
 
+    public void savePhenotypeAsCsv(Phenotype phenotype) {
+        int[][] edgeMap = new int[this.height + 1][this.width + 1];
+        try {
+            Color borderColor = Color.magenta;
+
+            BufferedImage bufferedImage = ImageIO.read(imageFile);
+
+            IntStream.range(0, this.height).forEach(value -> {
+                for (int i = 0; i < this.width - 1; i++) {
+                    int g1 = phenotype.pixelGroupList[this.getPointAsId(i, value)];
+                    int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
+
+                    edgeMap[value + 1][i + 1] = (g1 != g2) ? 0 : 255;
+                }
+            });
+
+            IntStream.range(0, this.width).forEach(value -> {
+                for (int i = 0; i < this.height - 1; i++) {
+                    int g1 = phenotype.pixelGroupList[this.getPointAsId(value, i)];
+                    int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
+
+                    edgeMap[i + 1][value + 1] = (g1 != g2) ? 0 : 255;
+                    if (g1 != g2) {
+                        bufferedImage.setRGB(value, i, borderColor.getRGB());
+                    }
+                }
+            });
+
+            for (int y = 0; y < this.height + 1; y++) {
+                for (int x = 0; x < this.width + 1; x++) {
+                    if (y == 0 || y == this.height) {
+                        edgeMap[y][x] = 0;
+                    } else if (x == 0 || x == this.width) {
+                        edgeMap[y][x] = 0;
+                    }
+                }
+
+            }
+            File csvOutputFile = new File("./out_csv.csv");
+            try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
+                for (int y = 0; y < this.height + 1; y++) {
+                    pw.println(Arrays.stream(edgeMap[y]).mapToObj(Integer::toString).collect(Collectors.joining(",")));
+                }
+            }
+            System.out.println(csvOutputFile.exists());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
 }

@@ -39,13 +39,14 @@ public class Main {
             //            System.exit(0);
 
             NSGA2 peeop    = new NSGA2(50, 2, 4, 0.2, 0.7, image);
-            var   skadoosh = peeop.runGenalg(50);
+            var   skadoosh = peeop.runGenalg(10);
             int   counter  = 0;
             for (Phenotype p : skadoosh) {
                 image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
                 counter++;
             }
             PhenotypeCombiner.saveAggregatedPhenotype(skadoosh, image, imagefp, "./pareto_front_img/combined");
+            image.savePhenotypeAsCsv(skadoosh.get(skadoosh.size() - 1));
 
 
             //SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
