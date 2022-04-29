@@ -6,6 +6,7 @@ import no.woldseth.image.Image;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class MOOEvaluatedPhenotype extends Phenotype implements PhenoInterface {
 
@@ -15,29 +16,28 @@ public class MOOEvaluatedPhenotype extends Phenotype implements PhenoInterface {
     public final double overallDeviation;
     public List<MOOEvaluatedPhenotype> dominatedSolutions;
     private int dominationCount = 0;
-    private int rank = -1;
+    private int rank = - 1;
     private double crowdingDist;
 
     public MOOEvaluatedPhenotype(Phenotype phenotype, double edgeValue, double connectivity, double overallDeviation) {
         super(phenotype.genome, phenotype.image);
 
-        this.edgeValue = edgeValue;
-        this.connectivity = connectivity;
-        this.overallDeviation = overallDeviation;
-        this.fitnessValues = List.of(edgeValue, connectivity, overallDeviation);
+        this.edgeValue          = edgeValue;
+        this.connectivity       = connectivity;
+        this.overallDeviation   = overallDeviation;
+        this.fitnessValues      = List.of(edgeValue, connectivity, overallDeviation);
         this.dominatedSolutions = new ArrayList<>();
 
     }
 
     public void resetFrontInfo() {
-        this.rank = -1;
-        this.crowdingDist = 0.0;
-        this.dominationCount = 0;
+        this.rank               = - 1;
+        this.crowdingDist       = 0.0;
+        this.dominationCount    = 0;
         this.dominatedSolutions = new ArrayList<>();
     }
 
-    public double getFitnessValueByIdx(int idx)
-    {
+    public double getFitnessValueByIdx(int idx) {
         return this.fitnessValues.get(idx);
     }
 
@@ -85,7 +85,8 @@ public class MOOEvaluatedPhenotype extends Phenotype implements PhenoInterface {
 
     @Override
     public Genotype getGenotype() {
-        return new Genotype(this.genome);
+        return (Genotype) this;
     }
+
 
 }

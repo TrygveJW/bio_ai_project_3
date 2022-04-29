@@ -1,5 +1,6 @@
 package no.woldseth.evolutionary_algorithm;
 
+import no.woldseth.DebugLogger;
 import no.woldseth.evolutionary_algorithm.representation.EvaluatedPhenotype;
 import no.woldseth.evolutionary_algorithm.representation.Genotype;
 import no.woldseth.evolutionary_algorithm.representation.MOOEvaluatedPhenotype;
@@ -10,12 +11,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class NSGA2 {
 
     private static final Random rng = new Random();
 
+    private static DebugLogger dbl = new DebugLogger(true);
     private final int populationSize;
     private final int numParentPairs;
     private final int numChildrenPerParentPair;
@@ -42,23 +45,37 @@ public class NSGA2 {
         this.criterion                = new Criterion(image);
         this.mutators                 = new Mutators(image);
         this.crossover                = new Crossover(image);
-        this.numObjectives = 3;
+        this.numObjectives            = 3;
+
+    }
+
+    private int leak = 5;
+
+    private void leakNew(List<MOOEvaluatedPhenotype> population) {
+        ArrayList<Genotype> leakGenomes = new ArrayList<>();
+        // leak new
+        for (int i = 0; i < leak; i++) {
+            leakGenomes.add(Initialization.generateInitialGenome(this.image));
+        }
+        population.addAll(this.evaluatedGenotypes(leakGenomes));
     }
 
     public List<? extends Phenotype> runGenalg(int numGenerations) {
 
         List<MOOEvaluatedPhenotype> population = this.evaluatedGenotypes(genInitialPopulation());
-        for (int gen = 0; gen < numGenerations; gen++)
-        {
+        for (int gen = 0; gen < numGenerations; gen++) {
+
+            //            this.leakNew(population);
+
             var parents = getParentPairs(population);
 
             // gen children
             var children = genChildren(parents);
             population.addAll(children);
 
-            var fronts = fastNonDominatedSort(population);
+            var                         fronts   = fastNonDominatedSort(population);
             List<MOOEvaluatedPhenotype> next_gen = new ArrayList<>();
-            int idx = 0;
+            int                         idx      = 0;
             if (fronts.size() > 1) {
                 System.out.println("Pareto front length: " + fronts.get(0).size());
                 System.out.println("Num fronts: " + fronts.size());
@@ -71,12 +88,18 @@ public class NSGA2 {
             }
 
             fronts.get(idx).sort(Comparator.comparingDouble(MOOEvaluatedPhenotype::getCrowdingDist));
-            int roomLeft = populationSize - next_gen.size();
+            int                             roomLeft = populationSize - next_gen.size();
             Iterator<MOOEvaluatedPhenotype> iterator = fronts.get(idx).iterator();
-            for (int i = 0; i < roomLeft && iterator.hasNext(); i++)
+            for (int i = 0; i < roomLeft && iterator.hasNext(); i++) {
                 next_gen.add(iterator.next());
+            }
 
-            population = next_gen;
+            if (gen % 25000 == 0 && gen != 0) {
+                population = this.removeDuplicates(next_gen);
+            } else {
+                population = next_gen;
+            }
+            //            population = next_gen;
             System.out.println("Gen number " + gen);
         }
         var paretoFront = fastNonDominatedSort(population).get(0);
@@ -89,8 +112,9 @@ public class NSGA2 {
 
     public void frontsToFile(List<List<MOOEvaluatedPhenotype>> m) {
         List<PhenoInterface> ert = new ArrayList<>();
-        for (var front : m)
+        for (var front : m) {
             crowdingDistanceAssignment(front);
+        }
         try {
             File myObj = new File("pareto_test.csv");
             if (myObj.createNewFile()) {
@@ -101,7 +125,12 @@ public class NSGA2 {
             FileWriter myWriter = new FileWriter("pareto_test.csv");
             for (List<MOOEvaluatedPhenotype> f : m) {
                 for (MOOEvaluatedPhenotype f2 : f) {
-                    myWriter.write(String.format("%f, %f, %f, %d\n", f2.connectivity, f2.edgeValue, f2.overallDeviation, f2.getRank()));
+                    myWriter.write(String.format("%f, %f, %f, %d\n",
+                                                 f2.connectivity,
+                                                 f2.edgeValue,
+                                                 f2.overallDeviation,
+                                                 f2.getRank()
+                                                ));
                 }
             }
             myWriter.close();
@@ -118,26 +147,40 @@ public class NSGA2 {
         for (var parentPair : parentPairs) {
             for (int i = 0; i < numChildrenPerParentPair; i++) {
                 Genotype child = genChild(parentPair.parent1, parentPair.parent2);
-                child = mutateGenome(child);
+                child = mutators.mutateGenome(child, mutationChance);
                 children.add(evaluatedGenotype(child));
             }
         }
         return children;
     }
 
-    private Genotype mutateGenome(Genotype genotype) {
-        if (rng.nextDouble() < mutationChance) {
-            mutators.simpleGeneFlipMutation(genotype);
+    private List<MOOEvaluatedPhenotype> removeDuplicates(List<MOOEvaluatedPhenotype> population) {
+
+        int preDropLen = population.size();
+        population = population.stream()
+                               .map(mooEvaluatedPhenotype -> (Phenotype) mooEvaluatedPhenotype)
+                               .distinct().map(phenotype -> (MOOEvaluatedPhenotype) phenotype)
+                               .collect(Collectors.toList());
+        int postDropLen = population.size();
+        int numDropped  = preDropLen - postDropLen;
+
+        dbl.log("pre", preDropLen);
+        dbl.log("post", postDropLen);
+
+        ArrayList<Genotype> leakGenomes = new ArrayList<>();
+        // leak new
+        for (int i = 0; i < numDropped; i++) {
+            leakGenomes.add(Initialization.generateInitialGenome(this.image));
         }
-        return genotype;
+        population.addAll(this.evaluatedGenotypes(leakGenomes));
+        return population;
     }
+
 
     private Genotype genChild(Genotype parent1, Genotype parent2) {
         Genotype child;
         if (rng.nextDouble() < crossChance) {
-            //            child = crossover.uniformCrossover(parent1, parent2, 0.5);
-            //            child = crossover.twoPointCross(parent1, parent2);
-            child = crossover.twoPointCross2d(parent1, parent2);
+            child = crossover.crossoverParents(parent1, parent2);
         } else {
             if (rng.nextBoolean()) {
                 child = new Genotype(parent1.genome);
@@ -154,6 +197,9 @@ public class NSGA2 {
         for (int i = 0; i < numParentPairs; i++) {
             parents.add(Selection.tournamentParentSelection(population, false));
         }
+        //        for (int i = 0; i < 2; i++) {
+        //            parents.add(Selection.randomParentSelection(population));
+        //        }
         return parents;
     }
 
@@ -163,16 +209,19 @@ public class NSGA2 {
          */
         List<List<MOOEvaluatedPhenotype>> fronts = new ArrayList<>();
         fronts.add(new ArrayList<>());
-        for (var t : population)
+        for (var t : population) {
             t.resetFrontInfo();
+        }
         for (MOOEvaluatedPhenotype moo : population) {
             for (MOOEvaluatedPhenotype moo2 : population) {
-                if(moo2.equals(moo))
+                if (moo2.equals(moo)) {
                     continue;
-                if (dominates(moo, moo2))
+                }
+                if (dominates(moo, moo2)) {
                     moo.addDominatedSolution(moo2);
-                else if (dominates(moo2, moo))
+                } else if (dominates(moo2, moo)) {
                     moo.incrementDominationCount();
+                }
             }
             if (moo.getDominationCount() == 0) {
                 moo.setRank(0);
@@ -181,13 +230,13 @@ public class NSGA2 {
         }
 
         int i = 0;
-        while (!fronts.get(i).isEmpty()) {
+        while (! fronts.get(i).isEmpty()) {
             List<MOOEvaluatedPhenotype> q = new ArrayList<>();
-            for(var p : fronts.get(i)) {
-                for(var dom : p.getDominatedSolutions()) {
+            for (var p : fronts.get(i)) {
+                for (var dom : p.getDominatedSolutions()) {
                     dom.decrementDominationCount();
                     if (dom.getDominationCount() == 0) {
-                        dom.setRank(i+1);
+                        dom.setRank(i + 1);
                         q.add(dom);
                     }
                 }
@@ -198,29 +247,30 @@ public class NSGA2 {
         fronts.remove(fronts.size() - 1);
         return fronts;
     }
+
     public void crowdingDistanceAssignment(List<MOOEvaluatedPhenotype> sol_set) {
         /*
          * Implementation based on algorithm presented in "A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II"
          */
         int end = sol_set.size() - 1;
 
-        for (var m : sol_set)
+        for (var m : sol_set) {
             m.setCrowdingDist(0.0);
+        }
         // Looper over hver objective
-        for (int i = 0; i < this.numObjectives; i++)
-        {
+        for (int i = 0; i < this.numObjectives; i++) {
             // Garra en bedre måte å gjøre dette på
             int finalI = i;
             double f_max = sol_set.stream()
-                    .max(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI)))
-                    .get().getFitnessValueByIdx(i);
+                                  .max(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI)))
+                                  .get().getFitnessValueByIdx(i);
 
             int finalI1 = i;
             double f_min = sol_set.stream()
-                    .min(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI1)))
-                    .get().getFitnessValueByIdx(i);
+                                  .min(Comparator.comparingDouble(fc -> fc.getFitnessValueByIdx(finalI1)))
+                                  .get().getFitnessValueByIdx(i);
 
-            double fitDelta = (f_max - f_min);
+            double fitDelta        = (f_max - f_min);
             double fitDeltaInverse = fitDelta > 0.0 ? (1 / fitDelta) : Double.POSITIVE_INFINITY;
 
             int finalI2 = i;
@@ -232,13 +282,17 @@ public class NSGA2 {
 
 
             for (int j = 1; j < end - 1; j++) {
-                double crowdDist = sol_set.get(j).getCrowdingDist() + (sol_set.get(j + 1).getFitnessValueByIdx(i) - sol_set.get(j - 1).getFitnessValueByIdx(i)) * fitDeltaInverse;
+                double crowdDist = sol_set.get(j).getCrowdingDist() + (sol_set.get(j + 1)
+                                                                              .getFitnessValueByIdx(i) - sol_set.get(j - 1)
+                                                                                                                .getFitnessValueByIdx(
+                                                                                                                        i)) * fitDeltaInverse;
                 sol_set.get(j).setCrowdingDist(crowdDist);
             }
         }
 
 
     }
+
     public boolean dominates(MOOEvaluatedPhenotype p1, MOOEvaluatedPhenotype p2) {
         /*
          * A solution dominates another if:
@@ -250,7 +304,7 @@ public class NSGA2 {
             if (p1.fitnessValues.get(i) < p2.fitnessValues.get(i)) {
                 return false;
 
-            } else if (!oneBetter && p1.fitnessValues.get(i) > p2.fitnessValues.get(i)) {
+            } else if (! oneBetter && p1.fitnessValues.get(i) > p2.fitnessValues.get(i)) {
                 oneBetter = true;
             }
         }
@@ -262,9 +316,9 @@ public class NSGA2 {
             return (MOOEvaluatedPhenotype) genotype;
         }
         Phenotype phenotype           = new Phenotype(genotype, image);
-        double    deviation           = criterion.phenotypeOverallDeviation(phenotype) * -1;
+        double    deviation           = criterion.phenotypeOverallDeviation(phenotype) * - 1;
         double    edgeVal             = criterion.phenotypeEdgeValue(phenotype) * 1;
-        double    connectivityMeasure = criterion.phenotypeConnectivityMeasure(phenotype) * -1;
+        double    connectivityMeasure = criterion.phenotypeConnectivityMeasure(phenotype) * - 1;
 
         //        System.out.println();
         //        dbl.log("dev", diviation);
@@ -287,4 +341,10 @@ public class NSGA2 {
         }
         return initialPopulation;
     }
+
+
+    //    public List<MOOEvaluatedPhenotype> forceZoneCombination(List<MOOEvaluatedPhenotype> population) {
+    //
+    //
+    //    }
 }

@@ -3,6 +3,7 @@ package no.woldseth.evolutionary_algorithm.util;
 import no.woldseth.DebugLogger;
 import no.woldseth.evolutionary_algorithm.representation.PixelConnectionType;
 import no.woldseth.image.Image;
+import no.woldseth.image.Pixel;
 
 import java.awt.Point;
 import java.lang.reflect.Array;
@@ -21,11 +22,20 @@ public class PrimsAlgorithm {
     private Image image;
     private PixelConnectionType[] currentState;
 
+    private int counter;
+    private int counterSelfSet;
+
+    private boolean[] validList = null;
     private static Random rand = new Random();
 
+    private List<GraphEdge> edgeList;
+
     private PrimsAlgorithm(Image image) {
-        this.image        = image;
-        this.currentState = new PixelConnectionType[image.numPixels];
+        this.image          = image;
+        this.currentState   = new PixelConnectionType[image.numPixels];
+        this.counter        = 0;
+        this.counterSelfSet = image.numPixels / 5;
+        this.edgeList       = new ArrayList<>(image.numPixels * 2);
         //        Arrays.fill(currentState, PixelConnectionType.SELF);
     }
 
@@ -34,23 +44,27 @@ public class PrimsAlgorithm {
         return prim.getSpanningTree();
     }
 
+    public static PixelConnectionType[] connectGroups(Image image, PixelConnectionType[] currentState, int startId) {
+        var prim = new PrimsAlgorithm(image);
+        prim.currentState = currentState;
+        prim.validList    = new boolean[currentState.length];
+        for (int i = 0; i < currentState.length; i++) {
+            prim.validList[i] = currentState[i] == null;
+        }
+
+        return prim.getSpanningTree(startId);
+    }
+
     private PixelConnectionType[] getSpanningTree() {
         int startPoint = rand.nextInt(this.image.numPixels);
+        return this.getSpanningTree(startPoint);
+
+    }
+
+    private PixelConnectionType[] getSpanningTree(int startPoint) {
 
         this.addNode(startPoint);
-        //        this.addNode(52);
 
-        //        GraphEdge iedge = edgesQue.remove();
-        //        tryConnectEdge(iedge);
-        //        while (! edgesQue.isEmpty()) {
-        //            System.out.println(edgesQue.size());
-        //            GraphEdge edge = edgesQue.remove();
-        //
-        //            dbl.log(edge.edgeValue, edge.fromNode, edge.toNode);
-        //        }
-        //        dbl.log(Arrays.copyOfRange(this.currentState, 0, 50));
-        //        dbl.log(Arrays.copyOfRange(this.currentState, 50, 100));
-        //        System.exit(0);
 
         int n = 0;
         while (! edgesQue.isEmpty()) {
@@ -63,7 +77,18 @@ public class PrimsAlgorithm {
             //                                                 n = 0;
             //            }
 
+
         }
+
+        //        edgeList.sort(GraphEdge::compareTo);
+        //        for (int i = 0; i < 200; i++) {
+        //            var edge = edgeList.get(edgeList.size() - i - 1);
+        //            System.out.println(edge.edgeValue);
+        //            currentState[edge.fromNode] = PixelConnectionType.SELF;
+        //            currentState[edge.toNode]   = PixelConnectionType.SELF;
+        //
+        //        }
+
         return currentState;
     }
 
@@ -79,6 +104,11 @@ public class PrimsAlgorithm {
     }
 
     private void assignEdge(int from, int to) {
+        if (validList != null) {
+            if (! validList[to]) {
+                return;
+            }
+        }
         Point fromPoint = image.getIdAsPoint(from);
         Point toPoint   = image.getIdAsPoint(to);
 
@@ -98,6 +128,13 @@ public class PrimsAlgorithm {
         } else {
             throw new RuntimeException();
         }
+
+        //        if (this.counter > counterSelfSet) {
+        //            connectionType = PixelConnectionType.SELF;
+        //            this.counter   = 0;
+        //        } else {
+        //            this.counter += 1;
+        //        }
 
         currentState[from] = connectionType;
 
@@ -144,6 +181,7 @@ public class PrimsAlgorithm {
                 double edgeVal = edgeMetric(nodePos.x, nodePos.y, newX, newY);
                 dbl.log("new point id", newPointId);
                 GraphEdge newEdge = new GraphEdge(nodeId, newPointId, edgeVal);
+                //                this.edgeList.add(newEdge);
                 edgesQue.add(newEdge);
             } else {
                 dbl.log("aaa");

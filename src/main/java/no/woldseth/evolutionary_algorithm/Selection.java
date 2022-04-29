@@ -25,7 +25,8 @@ public class Selection {
 
     private static final int tournamentSize = 4;
 
-    public static ParentPair tournamentParentSelection(List<? extends PhenoInterface> parentCandidates, boolean maximize) {
+    public static ParentPair tournamentParentSelection(List<? extends PhenoInterface> parentCandidates,
+                                                       boolean maximize) {
         List<? extends PhenoInterface> tournamentPool = rng.randomChoice(parentCandidates, tournamentSize, true);
 
         int flip = maximize ? - 1 : 1;
@@ -36,6 +37,12 @@ public class Selection {
                 throw new RuntimeException();
             }
         }
+        return new ParentPair(tournamentPool.get(0).getGenotype(), tournamentPool.get(1).getGenotype());
+    }
+
+
+    public static ParentPair randomParentSelection(List<? extends PhenoInterface> parentCandidates) {
+        List<? extends PhenoInterface> tournamentPool = rng.randomChoice(parentCandidates, 2, false);
         return new ParentPair(tournamentPool.get(0).getGenotype(), tournamentPool.get(1).getGenotype());
     }
 

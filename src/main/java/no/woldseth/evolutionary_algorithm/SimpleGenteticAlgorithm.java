@@ -125,22 +125,25 @@ public class SimpleGenteticAlgorithm {
     private Genotype mutateGenome(Genotype genotype) {
         if (rng.nextDouble() < mutationChance) {
 
-            mutators.simpleGeneFlipMutation(genotype);
-            //            switch (rng.nextInt(3)) {
-            //                case 0 -> {
-            //                    mutators.simpleGeneFlipMutation(genotype);
-            //                }
-            //                case 1 -> {
-            //                    mutators.horisontalLineMutation(genotype);
-            //                }
-            //                case 2 -> {
-            //                    mutators.verticalLineMutation(genotype);
-            //                }
-            //                default -> {
-            //                    throw new RuntimeException();
-            //                }
-            //
-            //            }
+            //            mutators.simpleGeneFlipMutation(genotype);
+            switch (rng.nextInt(2)) {
+                case 0 -> {
+                    mutators.simpleGeneFlipMutation(genotype);
+                }
+                //                case 1 -> {
+                //                    mutators.horisontalLineMutation(genotype);
+                //                }
+                //                case 2 -> {
+                //                    mutators.verticalLineMutation(genotype);
+                //                }
+                case 1 -> {
+                    mutators.mergeGroupMutation(genotype, image);
+                }
+                default -> {
+                    throw new RuntimeException();
+                }
+
+            }
         }
         return genotype;
     }

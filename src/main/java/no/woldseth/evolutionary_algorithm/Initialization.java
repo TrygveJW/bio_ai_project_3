@@ -19,7 +19,7 @@ public class Initialization {
         //                                             .toArray(PixelConnectionType[]::new);
 
         PixelConnectionType[] genome = PrimsAlgorithm.getSpanningTree(image);
-        //        Random                rng    = new Random();
+        Random                rng    = new Random();
         //        for (int i = 0; i < 10; i++) {
         //            genome[rng.nextInt(genome.length)] = PixelConnectionType.SELF;
         //
@@ -28,16 +28,16 @@ public class Initialization {
     }
 
     public static Genotype generateRandomGenome(Image image) {
-                PixelConnectionType[] genome = Arrays.stream(image.pixleArray)
-                                                    .map(pixel -> getPixelBestConnection(pixel, image))
-                                                     .toArray(PixelConnectionType[]::new);
+        PixelConnectionType[] genome = Arrays.stream(image.pixleArray)
+                                             .map(pixel -> getPixelBestConnection(pixel, image))
+                                             .toArray(PixelConnectionType[]::new);
 
 
-                //Random                rng    = new Random();
-                //for (int i = 0; i < 10; i++) {
-                //    genome[rng.nextInt(genome.length)] = PixelConnectionType.SELF;
+        //Random                rng    = new Random();
+        //for (int i = 0; i < 10; i++) {
+        //    genome[rng.nextInt(genome.length)] = PixelConnectionType.SELF;
 
-                //}
+        //}
         return new Genotype(genome);
     }
 

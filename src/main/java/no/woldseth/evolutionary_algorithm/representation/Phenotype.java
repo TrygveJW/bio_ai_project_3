@@ -116,4 +116,21 @@ public class Phenotype extends Genotype {
 
 
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Phenotype phenotype = (Phenotype) o;
+        return Arrays.equals(pixelGroupList, phenotype.pixelGroupList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(pixelGroupList);
+    }
 }
