@@ -170,6 +170,7 @@ public class Image {
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
 
                     edgeMap[value + 1][i + 1] = (g1 != g2) ? 0 : 255;
+                    edgeMap[value + 1][i + 2] = (g1 != g2) ? 0 : 255;
                 }
             });
 
@@ -179,9 +180,7 @@ public class Image {
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
 
                     edgeMap[i + 1][value + 1] = (g1 != g2) ? 0 : 255;
-                    if (g1 != g2) {
-                        bufferedImage.setRGB(value, i, borderColor.getRGB());
-                    }
+                    edgeMap[i + 2][value + 1] = (g1 != g2) ? 0 : 255;
                 }
             });
 
