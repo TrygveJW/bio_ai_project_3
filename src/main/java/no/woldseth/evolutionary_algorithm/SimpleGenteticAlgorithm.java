@@ -111,7 +111,7 @@ public class SimpleGenteticAlgorithm {
         if (rng.nextDouble() < crossChance) {
             //            child = crossover.uniformCrossover(parent1, parent2, 0.5);
             //            child = crossover.twoPointCross(parent1, parent2);
-            child = crossover.twoPointCross2d(parent1, parent2);
+            child = crossover.crossoverParents(parent1, parent2);
         } else {
             if (rng.nextBoolean()) {
                 child = new Genotype(parent1.genome);
@@ -153,7 +153,7 @@ public class SimpleGenteticAlgorithm {
         for (var parentPair : parentPairs) {
             for (int i = 0; i < numChildrenPerParentPair; i++) {
                 Genotype child = genChild(parentPair.parent1, parentPair.parent2);
-                child = mutateGenome(child);
+                child = mutators.mutateGenome(child, mutationChance);
                 children.add(evaluatedGenotype(child));
             }
         }
@@ -162,7 +162,7 @@ public class SimpleGenteticAlgorithm {
 
 
     private double deviationWeight = - 100 * 2;
-    private double edgeValWeight = 0.01 * 1;
+    private double edgeValWeight = 0.01 * 2;
     private double connectivityWeight = - 1 * 3;
 
     private EvaluatedPhenotype evaluatedGenotype(Genotype genotype) {

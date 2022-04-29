@@ -22,7 +22,7 @@ public class Crossover {
 
     public Genotype crossoverParents(Genotype parent1, Genotype parent2) {
         Genotype child;
-        switch (rng.nextInt(1)) {
+        switch (rng.nextInt(2)) {
             case 0 -> {
                 child = this.twoPointCross2d(parent1, parent2);
             }
@@ -59,14 +59,14 @@ public class Crossover {
     public Genotype twoPointCross(Genotype parent1, Genotype parent2) {
         Genotype child = new Genotype(new PixelConnectionType[parent1.genome.length]);
 
-        int size  = rng.nextInt(maxSize1);
-        int start = rng.nextInt(child.genome.length - size);
-        int a     = start;
-        int b     = start + size;
+        //        int size  = rng.nextInt(maxSize1);
+        //        int start = rng.nextInt(child.genome.length - size);
+        //        int a     = start;
+        //        int b     = start + size;
 
 
-        //        int a    = rng.nextInt(child.genome.length);
-        //        int b    = rng.nextInt(child.genome.length);
+        int a    = rng.nextInt(child.genome.length);
+        int b    = rng.nextInt(child.genome.length);
         int from = Math.min(a, b);
         int to   = Math.max(a, b);
 
@@ -110,8 +110,8 @@ public class Crossover {
         Genotype child = new Genotype(new PixelConnectionType[parent1.genome.length]);
 
 
-        int size  = rng.nextInt(maxSize);
-        int start = rng.nextInt(image.width - size);
+        //        int size  = rng.nextInt(maxSize);
+        //        int start = rng.nextInt(image.width - size);
         //        int a     = start;
         //        int b     = start + size;
 
@@ -121,8 +121,8 @@ public class Crossover {
         int fromX = Math.min(a, b);
         int toX   = Math.max(a, b);
 
-        size  = rng.nextInt(maxSize);
-        start = rng.nextInt(image.height - size);
+        //        size  = rng.nextInt(maxSize);
+        //        start = rng.nextInt(image.height - size);
         //        int c = start;
         //        int d = start + size;
 
