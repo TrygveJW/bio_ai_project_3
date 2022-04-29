@@ -158,7 +158,7 @@ public class Image {
     }
 
     public void savePhenotypeAsCsv(Phenotype phenotype) {
-        int[][] edgeMap = new int[this.height + 1][this.width + 1];
+        int[][] edgeMap = new int[this.height][this.width];
         try {
             Color borderColor = Color.magenta;
 
@@ -169,8 +169,8 @@ public class Image {
                     int g1 = phenotype.pixelGroupList[this.getPointAsId(i, value)];
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
 
-                    edgeMap[value + 1][i + 1] = (g1 != g2) ? 0 : 255;
-                    edgeMap[value + 1][i + 2] = (g1 != g2) ? 0 : 255;
+                    edgeMap[value][i]     = (g1 != g2) ? 0 : 255;
+                    edgeMap[value][i + 1] = (g1 != g2) ? 0 : 255;
                 }
             });
 
@@ -179,16 +179,16 @@ public class Image {
                     int g1 = phenotype.pixelGroupList[this.getPointAsId(value, i)];
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
 
-                    edgeMap[i + 1][value + 1] = (g1 != g2) ? 0 : 255;
-                    edgeMap[i + 2][value + 1] = (g1 != g2) ? 0 : 255;
+                    edgeMap[i][value]     = (g1 != g2) ? 0 : 255;
+                    edgeMap[i + 1][value] = (g1 != g2) ? 0 : 255;
                 }
             });
 
-            for (int y = 0; y < this.height + 1; y++) {
-                for (int x = 0; x < this.width + 1; x++) {
-                    if (y == 0 || y == this.height) {
+            for (int y = 0; y < this.height; y++) {
+                for (int x = 0; x < this.width; x++) {
+                    if (y == 0 || y == this.height - 1) {
                         edgeMap[y][x] = 0;
-                    } else if (x == 0 || x == this.width) {
+                    } else if (x == 0 || x == this.width - 1) {
                         edgeMap[y][x] = 0;
                     }
                 }
@@ -196,7 +196,7 @@ public class Image {
             }
             File csvOutputFile = new File("./out_csv.csv");
             try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
-                for (int y = 0; y < this.height + 1; y++) {
+                for (int y = 0; y < this.height; y++) {
                     pw.println(Arrays.stream(edgeMap[y]).mapToObj(Integer::toString).collect(Collectors.joining(",")));
                 }
             }
