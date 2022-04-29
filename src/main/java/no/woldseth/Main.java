@@ -37,15 +37,18 @@ public class Main {
                         //var a = Initialization.generateInitialGenome(image);
                         //image.savePixelGroupEdgeDisplay(new Phenotype(a, image), "./init_test_img");
                         //System.exit(0);
+            
 
-            NSGA2 peeop    = new NSGA2(25, 2, 2, 0.2, 0.7, image);
-            var   skadoosh = peeop.runGenalg(50);
+            NSGA2 peeop    = new NSGA2(50, 2, 4, 0.2, 0.7, image);
+            var   skadoosh = peeop.runGenalg(10);
+
             int   counter  = 0;
             for (Phenotype p : skadoosh) {
                 image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
                 counter++;
             }
             PhenotypeCombiner.saveAggregatedPhenotype(skadoosh, image, imagefp, "./pareto_front_img/combined");
+            image.savePhenotypeAsCsv(skadoosh.get(skadoosh.size() - 1));
 
 
             //SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
