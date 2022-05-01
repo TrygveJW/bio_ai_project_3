@@ -272,9 +272,9 @@ public class NSGA2 {
         for (int i = 0; i < numParentPairs; i++) {
             parents.add(Selection.tournamentParentSelection(population, false));
         }
-        for (int i = 0; i < 2; i++) {
-            parents.add(Selection.randomParentSelection(population));
-        }
+        //for (int i = 0; i < 2; i++) {
+        //    parents.add(Selection.randomParentSelection(population));
+        //}
         return parents;
     }
 

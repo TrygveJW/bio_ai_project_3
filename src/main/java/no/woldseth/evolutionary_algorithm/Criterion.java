@@ -45,7 +45,7 @@ public class Criterion {
 
     public double phenotypeOverallDeviation(Phenotype phenotype) {
 
-        return phenotype.pixelGroups.stream()
+        return - phenotype.pixelGroups.stream()
                                     .map(this::pixelGroupRgbDist)
                                     .mapToDouble(Double::doubleValue)
                                     .sum();

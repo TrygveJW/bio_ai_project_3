@@ -118,7 +118,43 @@ public class Image {
     }
 
     public void saveGroundTruthImage(Phenotype phenotype, String filePath) {
+        try {
+            Color borderColor = Color.black;
 
+            BufferedImage bufferedImage = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D    graphics = bufferedImage.createGraphics();
+
+            graphics.setPaint ( new Color ( 255, 255, 255 ) );
+            graphics.fillRect ( 1, 1, bufferedImage.getWidth() - 2, bufferedImage.getHeight() - 2 );
+
+            IntStream.range(0, this.height).forEach(value -> {
+                for (int i = 0; i < this.width - 1; i++) {
+                    int g1 = phenotype.pixelGroupList[this.getPointAsId(i, value)];
+                    int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
+
+                    if (g1 != g2) {
+                        bufferedImage.setRGB(i, value, borderColor.getRGB());
+                    }
+                }
+            });
+
+            IntStream.range(0, this.width).forEach(value -> {
+                for (int i = 0; i < this.height - 1; i++) {
+                    int g1 = phenotype.pixelGroupList[this.getPointAsId(value, i)];
+                    int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
+
+                    if (g1 != g2) {
+                        bufferedImage.setRGB(value, i, borderColor.getRGB());
+                    }
+                }
+            });
+
+            File outFp = new File(filePath + ".png");
+            ImageIO.write(bufferedImage, "png", outFp);
+
+        } catch (Exception e) {
+
+        }
     }
 
     public void savePixelGroupEdgeDisplay(Phenotype phenotype, String filePath) {

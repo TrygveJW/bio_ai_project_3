@@ -13,6 +13,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
@@ -25,17 +26,11 @@ public class Main {
     }
 
     private static void NSGA() {
+        String imgNum = "118035";
+        File imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
 
-
-        //        File imagefp = new File("./training_images/training_images/147091/Test image.jpg");
-        File imagefp = new File("./training_images/training_images/176039/Test image.jpg");
-
-        //        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
-        //        File imagefp = new File("./training_images/training_images/353013/Test image.jpg");
-
-        //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
-        //        File imagefp = new File("./training_images/training_images/test/test_img.png");
-        //        File imagefp = new File("./training_images/training_images/test/test_img_shitty_compressed.jpg");
+        //        File imagefp = new File("./training_images/test/test_img.png");
+        //        File imagefp = new File("./training_images/test/test_img_shitty_compressed.jpg");
         try {
             Image image = new Image(imagefp);
 
@@ -44,19 +39,24 @@ public class Main {
                         //System.exit(0);
             
 
-            NSGA2 peeop    = new NSGA2(100, 25, 4, 0.07, 0.9, image);
-            var   skadoosh = peeop.runGenalg(100);
+            NSGA2 peeop    = new NSGA2(50, 20, 2, 0.1, 0.8, image);
+            var   skadoosh = peeop.runGenalg(50);
 
 
             //NSGA2 peeop    = new NSGA2(50, 2, 2, 0.3, 0.8, image);
             //var   skadoosh = peeop.runGenalg(100);
 
+
+
             int counter = 0;
             for (Phenotype p : skadoosh) {
                 image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
+                image.saveGroundTruthImage(p, "./pareto_front_type2/img2Num" + counter);
                 image.savePhenotypeAsCsv(p,"./pareto_front_txt/txtNum" + counter);
                 counter++;
             }
+            System.out.println("Evaluating images, please wait...");
+            evaluateFront(imgNum);
 
             counter = 0;
             //            for (Phenotype p : peeop.getMostBest((ArrayList<MOOEvaluatedPhenotype>) skadoosh)) {
@@ -103,5 +103,64 @@ public class Main {
             throw new RuntimeException(e);
         }
 
+    }
+    private static void evaluateFront(String imgNum) {
+        try {
+
+            ProcessBuilder pb = new ProcessBuilder("python", "./python_evaluator/run.py", "--image_number", imgNum);
+            Process pr = pb.start();
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    pr.getInputStream()));
+
+            String line;
+            while ((line = in.readLine()) != null) {
+                System.out.println(line);
+            }
+            in.close();
+            pr.waitFor();
+
+        } catch (Exception ignored) {
+        }
+    }
+    private static int RPI(BufferedImage img1, BufferedImage img2) {
+        int colorValueSlackRange = 40;
+        int blackValueThreshold = 100;
+        int pixelRangeCheck = 4;
+        boolean checkEightSurroundingPixels = true;
+        int height = img1.getHeight();
+        int width = img1.getWidth();
+
+        int counter = 0;
+        int numberOfBlackPixels = 0;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int color1 = img1.getRGB(x, y);
+                int color2 = img2.getRGB(x, y);
+                if (color1 < blackValueThreshold) {
+                    numberOfBlackPixels += 1;
+                    if (color1 == color2) {
+                        counter += 1;
+                    } else if (checkEightSurroundingPixels) {
+                        boolean correctFound = false;
+                        for (int w2 = y-pixelRangeCheck; w2 < y+pixelRangeCheck +1; w2++) {
+                            if (correctFound)
+                                break;
+                            for (int h2 = x-pixelRangeCheck; w2 < x+pixelRangeCheck +1; w2++) {
+                                if(w2 >= 0 && h2 >= 0 && w2 < width && h2 < height) {
+                                    color2 = img2.getRGB(w2, h2);
+                                    if (color1 - colorValueSlackRange < color2 && color2 < colorValueSlackRange + color1) {
+                                        correctFound = true;
+                                        counter += 1;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return counter/ Math.max(numberOfBlackPixels, 1);
     }
 }
