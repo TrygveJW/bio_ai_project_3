@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  */
 public class DebugLogger {
 
-    private final boolean print;
+    public boolean print;
 
     /**
      * Makes a debug logger

@@ -40,51 +40,57 @@ public class Criterion {
                                                      ) + Math.pow(pixel.getGreen() - avgGreen, 2) + Math.pow(
                              pixel.getBlue() - avgBlue, 2)))
                      .mapToDouble(Double::doubleValue)
-                     .average()
-                     .getAsDouble();
+                     .sum();
     }
 
     public double phenotypeOverallDeviation(Phenotype phenotype) {
-        return phenotype.pixelGroups.stream()
-                                    .map(this::pixelGroupRgbDist)
-                                    .mapToDouble(Double::doubleValue)
-                                    .average()
-                                    .getAsDouble();
+        return - phenotype.pixelGroups.stream()
+                                      .map(this::pixelGroupRgbDist)
+                                      .mapToDouble(Double::doubleValue)
+                                      .sum();
+        //                                    .getAsDouble();
     }
 
     public double phenotypeEdgeValue(Phenotype phenotype) {
-        double edgeVal = IntStream.range(0, image.height).mapToDouble(value -> {
-            double roll = 0;
+        double counter = 0;
+        double roll    = 0;
+        for (int y = 0; y < image.height; y++) {
             for (int i = 0; i < image.width - 1; i++) {
-                int g1 = phenotype.pixelGroupList[image.getPointAsId(i, value)];
-                int g2 = phenotype.pixelGroupList[image.getPointAsId(i + 1, value)];
+                int g1 = phenotype.pixelGroupList[image.getPointAsId(i, y)];
+                int g2 = phenotype.pixelGroupList[image.getPointAsId(i + 1, y)];
 
                 if (g1 != g2) {
-                    roll += image.getRgbDelta(i, value, i + 1, value);
+                    roll += image.getRgbDelta(i, y, i + 1, y);
+                    counter += 1;
                 }
             }
-            return roll;
-        }).sum();
+        }
 
-        edgeVal += IntStream.range(0, image.width).mapToDouble(value -> {
-            double roll = 0;
+
+        for (int x = 0; x < image.width; x++) {
+
             for (int i = 0; i < image.height - 1; i++) {
-                int g1 = phenotype.pixelGroupList[image.getPointAsId(value, i)];
-                int g2 = phenotype.pixelGroupList[image.getPointAsId(value, i + 1)];
+                int g1 = phenotype.pixelGroupList[image.getPointAsId(x, i)];
+                int g2 = phenotype.pixelGroupList[image.getPointAsId(x, i + 1)];
 
                 if (g1 != g2) {
-                    roll += image.getRgbDelta(value, i, value, i + 1);
+                    roll += image.getRgbDelta(x, i, x, i + 1);
+                    counter += 1;
                 }
             }
-            return roll;
-        }).sum();
+        }
 
-        return edgeVal;
+
+        if (counter == 0) {
+            return - 1000000;
+        } else {
+            return (roll / counter);
+        }
     }
 
     public double phenotypeConnectivityMeasure(Phenotype phenotype) {
 
-        return IntStream.range(0, image.height).mapToDouble(value -> {
+        return - IntStream.range(0, image.height).mapToDouble(value -> {
             double fullroll = 0;
             for (int i = 0; i < image.width - 1; i++) {
                 double roll = 0;

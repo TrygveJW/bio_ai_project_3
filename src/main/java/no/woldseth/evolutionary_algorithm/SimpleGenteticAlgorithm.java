@@ -7,6 +7,7 @@ import no.woldseth.evolutionary_algorithm.representation.Phenotype;
 import no.woldseth.image.Image;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -81,9 +82,10 @@ public class SimpleGenteticAlgorithm {
             //            population = Selection.killAllParentsSelection(population, parents);
             population = Selection.elitismSelection(population, this.populationSize, true);
         }
-        population.sort((o1, o2) -> - 1 * o1.compareTo(o2));
-        this.displayEval(population.get(0));
-        return population.get(0);
+        population.sort(Comparator.naturalOrder());
+        int lastIdx = population.size() - 1;
+        this.displayEval(population.get(lastIdx));
+        return population.get(lastIdx);
         //        image.savePixelGroupEdgeDisplay(population.get(0));
         //
         //        for (int i = 0; i < image.height; i++) {
@@ -101,6 +103,10 @@ public class SimpleGenteticAlgorithm {
         List<Selection.ParentPair> parents = new ArrayList<>();
         for (int i = 0; i < numParentPairs; i++) {
             parents.add(Selection.tournamentParentSelection(population, true));
+        }
+
+        for (int i = 0; i < 2; i++) {
+            parents.add(Selection.randomParentSelection(population));
         }
         return parents;
 
@@ -122,31 +128,6 @@ public class SimpleGenteticAlgorithm {
         return child;
     }
 
-    private Genotype mutateGenome(Genotype genotype) {
-        if (rng.nextDouble() < mutationChance) {
-
-            //            mutators.simpleGeneFlipMutation(genotype);
-            switch (rng.nextInt(2)) {
-                case 0 -> {
-                    mutators.simpleGeneFlipMutation(genotype);
-                }
-                //                case 1 -> {
-                //                    mutators.horisontalLineMutation(genotype);
-                //                }
-                //                case 2 -> {
-                //                    mutators.verticalLineMutation(genotype);
-                //                }
-                case 1 -> {
-                    mutators.mergeGroupMutation(genotype, image);
-                }
-                default -> {
-                    throw new RuntimeException();
-                }
-
-            }
-        }
-        return genotype;
-    }
 
     private List<EvaluatedPhenotype> genChildren(List<Selection.ParentPair> parentPairs) {
         List<EvaluatedPhenotype> children = new ArrayList<>();
@@ -161,9 +142,9 @@ public class SimpleGenteticAlgorithm {
     }
 
 
-    private double deviationWeight = - 100 * 2;
-    private double edgeValWeight = 0.01 * 2;
-    private double connectivityWeight = - 1 * 3;
+    private double deviationWeight = 0.0002;
+    private double edgeValWeight = 8;
+    private double connectivityWeight = 1;
 
     private EvaluatedPhenotype evaluatedGenotype(Genotype genotype) {
         if (genotype instanceof EvaluatedPhenotype) {
@@ -205,7 +186,9 @@ public class SimpleGenteticAlgorithm {
     private List<Genotype> genInitialPopulation() {
         List<Genotype> initialPopulation = new ArrayList<>();
         for (int i = 0; i < this.populationSize; i++) {
-            initialPopulation.add(Initialization.generateInitialGenome(image));
+            var newGenome = Initialization.generateInitialGenome(image);
+            //            newGenome = mutators.simpleGeneFlipMutation(newGenome);
+            initialPopulation.add(newGenome);
         }
         return initialPopulation;
     }

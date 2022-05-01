@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 
 public class PrimsAlgorithm {
 
-    private static DebugLogger dbl = new DebugLogger(false);
+    private static Random rng = new Random();
+    public static DebugLogger dbl = new DebugLogger(false);
     private static List<PixelConnectionType> connectionTypes = new ArrayList<>(List.of(PixelConnectionType.UP,
                                                                                        PixelConnectionType.DOWN,
                                                                                        PixelConnectionType.LEFT,
@@ -48,8 +49,23 @@ public class PrimsAlgorithm {
         var prim = new PrimsAlgorithm(image);
         prim.currentState = currentState;
         prim.validList    = new boolean[currentState.length];
+        int cnt = 0;
         for (int i = 0; i < currentState.length; i++) {
-            prim.validList[i] = currentState[i] == null;
+            if (currentState[i] == null) {
+                cnt += 1;
+                prim.validList[i] = currentState[i] == null;
+            }
+        }
+        //        System.out.println("num null" + cnt);
+        if (cnt == 1) {
+
+            for (int i = 0; i < currentState.length; i++) {
+                if (currentState[i] == null) {
+                    currentState[i] = PixelConnectionType.RIGHT;
+                    return currentState;
+                }
+            }
+
         }
 
         return prim.getSpanningTree(startId);
@@ -63,12 +79,15 @@ public class PrimsAlgorithm {
 
     private PixelConnectionType[] getSpanningTree(int startPoint) {
 
-        this.addNode(startPoint);
+        this.addNode(startPoint, true);
+        dbl.log(startPoint);
+        //        dbl.dumpStackHere();
 
 
         int n = 0;
         while (! edgesQue.isEmpty()) {
             n++;
+
             GraphEdge minEdge = edgesQue.remove();
 
             tryConnectEdge(minEdge);
@@ -79,15 +98,34 @@ public class PrimsAlgorithm {
 
 
         }
+        //        for (var ct : this.currentState) {
+        //            if (ct == null) {
+        //                throw new RuntimeException();
+        //            }
+        //        }
+        //        System.out.println(n);
+        //        if (n == 1) {
+        //            System.out.println(edgesQue.toString());
+        //            System.exit(0);
+        //        }
 
         //        edgeList.sort(GraphEdge::compareTo);
-        //        for (int i = 0; i < 200; i++) {
-        //            var edge = edgeList.get(edgeList.size() - i - 1);
+        //        boolean stop = false;
+        //        int     idx  = 0;
+        //        double  avg  = edgeList.stream().mapToDouble(graphEdge -> graphEdge.edgeValue).average().getAsDouble();
+        //        while (! stop) {
+        //            idx += 1;
+        //            //        for (int i = 0; i < 500; i++) {
+        //            var edge = edgeList.get(edgeList.size() - idx - 1);
         //            System.out.println(edge.edgeValue);
         //            currentState[edge.fromNode] = PixelConnectionType.SELF;
         //            currentState[edge.toNode]   = PixelConnectionType.SELF;
+        //            if (edge.edgeValue < avg * 8) {
+        //                stop = true;
+        //            }
         //
         //        }
+        //        System.out.println("avg value:" + avg);
 
         return currentState;
     }
@@ -100,15 +138,13 @@ public class PrimsAlgorithm {
         } else {
             dbl.log(edge.fromNode, edge.toNode);
             dbl.log("issues mebbe", currentState[edge.fromNode], currentState[edge.toNode]);
+
         }
+
     }
 
     private void assignEdge(int from, int to) {
-        if (validList != null) {
-            if (! validList[to]) {
-                return;
-            }
-        }
+
         Point fromPoint = image.getIdAsPoint(from);
         Point toPoint   = image.getIdAsPoint(to);
 
@@ -140,15 +176,20 @@ public class PrimsAlgorithm {
 
         if (currentState[to] != null) {
             this.addNode(from);
-        } else if (currentState[from] == null) {
+        } else {
             this.addNode(to);
         }
     }
 
     private void addNode(int nodeId) {
+        addNode(nodeId, false);
+    }
+
+    private void addNode(int nodeId, boolean initial) {
 
         Point nodePos = image.getIdAsPoint(nodeId);
         Collections.shuffle(connectionTypes);
+
         for (var conn : connectionTypes) {
             int newX = nodePos.x;
             int newY = nodePos.y;
@@ -172,17 +213,34 @@ public class PrimsAlgorithm {
 
             dbl.log(nodePos, newX, newY);
             if ((newX >= image.width || newX < 0) || (newY >= image.height || newY < 0)) {
-                dbl.log();
+                dbl.log("oob");
                 continue;
             }
             int newPointId = image.getPointAsId(newX, newY);
 
+            if (validList != null) {
+                if (! validList[newPointId]) {
+                    dbl.log("invalid");
+                    continue;
+                }
+            }
+
             if (currentState[newPointId] == null) {
                 double edgeVal = edgeMetric(nodePos.x, nodePos.y, newX, newY);
+
+                double noise_multi = rng.nextDouble(- 0.2, 0.2);
+                edgeVal += edgeVal * noise_multi;
+
                 dbl.log("new point id", newPointId);
-                GraphEdge newEdge = new GraphEdge(nodeId, newPointId, edgeVal);
+                GraphEdge newEdge;
                 //                this.edgeList.add(newEdge);
+
+                newEdge = new GraphEdge(nodeId, newPointId, edgeVal);
                 edgesQue.add(newEdge);
+                if (initial) {
+                    currentState[nodeId] = conn;
+                                           initial = false;
+                }
             } else {
                 dbl.log("aaa");
             }

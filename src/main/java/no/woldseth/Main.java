@@ -2,6 +2,7 @@ package no.woldseth;
 
 import no.woldseth.evolutionary_algorithm.*;
 import no.woldseth.evolutionary_algorithm.representation.Genotype;
+import no.woldseth.evolutionary_algorithm.representation.MOOEvaluatedPhenotype;
 import no.woldseth.evolutionary_algorithm.representation.Phenotype;
 import no.woldseth.image.Image;
 
@@ -10,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.*;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Main {
@@ -24,6 +26,7 @@ public class Main {
 
     private static void NSGA() {
 
+        //        File imagefp = new File("./training_images/training_images/147091/Test image.jpg");
         File imagefp = new File("./training_images/training_images/176039/Test image.jpg");
         //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
         //        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
@@ -38,13 +41,21 @@ public class Main {
             //            image.savePixelGroupEdgeDisplay(new Phenotype(a, image), "./init_test_img");
             //            System.exit(0);
 
-            NSGA2 peeop    = new NSGA2(50, 2, 4, 0.2, 0.7, image);
-            var   skadoosh = peeop.runGenalg(10);
-            int   counter  = 0;
+            NSGA2 peeop    = new NSGA2(50, 2, 2, 0.3, 0.8, image);
+            var   skadoosh = peeop.runGenalg(100);
+
+
+            int counter = 0;
             for (Phenotype p : skadoosh) {
                 image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
                 counter++;
             }
+
+            counter = 0;
+            //            for (Phenotype p : peeop.getMostBest((ArrayList<MOOEvaluatedPhenotype>) skadoosh)) {
+            //                image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/AA_BEST_imgNum" + counter);
+            //                counter++;
+            //            }
             PhenotypeCombiner.saveAggregatedPhenotype(skadoosh, image, imagefp, "./pareto_front_img/combined");
             image.savePhenotypeAsCsv(skadoosh.get(skadoosh.size() - 1));
 
@@ -63,9 +74,9 @@ public class Main {
 
     private static void SGA() {
 
-        //        File imagefp = new File("./training_images/training_images/176039/Test image.jpg");
-        //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
-        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
+        File imagefp = new File("./training_images/training_images/176039/Test image.jpg");
+        //File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
+        //        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
 
         //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
         //        File imagefp = new File("./training_images/training_images/test/test_img.png");
@@ -74,8 +85,8 @@ public class Main {
             Image image = new Image(imagefp);
 
 
-            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 1, 2, 0.2, 0.7, image);
-            var                     ph                = genteticAlgorithm.runGenalg(100);
+            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 5, 2, 0.2, 0.8, image);
+            var                     ph                = genteticAlgorithm.runGenalg(50);
             image.savePixelGroupEdgeDisplay(ph, "./out_img");
 
 

@@ -1,6 +1,7 @@
 package no.woldseth.evolutionary_algorithm;
 
 import no.woldseth.DebugLogger;
+import no.woldseth.ExtendedRandom;
 import no.woldseth.evolutionary_algorithm.representation.EvaluatedPhenotype;
 import no.woldseth.evolutionary_algorithm.representation.Genotype;
 import no.woldseth.evolutionary_algorithm.representation.MOOEvaluatedPhenotype;
@@ -11,12 +12,13 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
 public class NSGA2 {
 
-    private static final Random rng = new Random();
+    private static final ExtendedRandom rng = new ExtendedRandom();
 
     private static DebugLogger dbl = new DebugLogger(true);
     private final int populationSize;
@@ -60,12 +62,28 @@ public class NSGA2 {
         population.addAll(this.evaluatedGenotypes(leakGenomes));
     }
 
+    private List<MOOEvaluatedPhenotype> sketchyMutate(List<MOOEvaluatedPhenotype> population) {
+
+        ArrayList<MOOEvaluatedPhenotype> ret     = new ArrayList<>();
+        var                              genomes = rng.randomChoice(population, 5, false);
+
+        for (MOOEvaluatedPhenotype phenotype : genomes) {
+            Genotype newGenome = new Genotype(phenotype.genome.clone());
+            mutators.mergeGroupMutation(newGenome, image);
+            ret.add(this.evaluatedGenotype(newGenome));
+        }
+        return ret;
+
+    }
+
     public List<? extends Phenotype> runGenalg(int numGenerations) {
 
-        List<MOOEvaluatedPhenotype> population = this.evaluatedGenotypes(genInitialPopulation());
+        List<MOOEvaluatedPhenotype>       population = this.evaluatedGenotypes(genInitialPopulation());
+        List<List<MOOEvaluatedPhenotype>> fronts     = null;
         for (int gen = 0; gen < numGenerations; gen++) {
 
             //            this.leakNew(population);
+
 
             var parents = getParentPairs(population);
 
@@ -73,7 +91,11 @@ public class NSGA2 {
             var children = genChildren(parents);
             population.addAll(children);
 
-            var                         fronts   = fastNonDominatedSort(population);
+
+            //            var sketchy = this.sketchyMutate(population);
+            //            population.addAll(sketchy);
+
+            fronts = fastNonDominatedSort(population);
             List<MOOEvaluatedPhenotype> next_gen = new ArrayList<>();
             int                         idx      = 0;
             if (fronts.size() > 1) {
@@ -99,15 +121,65 @@ public class NSGA2 {
             } else {
                 population = next_gen;
             }
+
             //            population = next_gen;
+            System.out.println("population size: " + population.size());
             System.out.println("Gen number " + gen);
         }
-        var paretoFront = fastNonDominatedSort(population).get(0);
+        //        var paretoFront = fastNonDominatedSort(population).get(0);
         // TODO: 28/04/2022 Fiks resten her Axel
-        System.out.println(paretoFront.get(0).connectivity);
+        System.out.println(fronts.get(0).get(0).connectivity);
         System.out.println("skadoosh");
-        frontsToFile(fastNonDominatedSort(population));
-        return paretoFront;
+        frontsToFile(fronts);
+        return bruteForceLast(population, 50);
+    }
+
+    private List<MOOEvaluatedPhenotype> bruteForceLast(List<MOOEvaluatedPhenotype> population, int rounds) {
+
+        //        ArrayList<MOOEvaluatedPhenotype> ret     = new ArrayList<>();
+        //        var                              genomes = rng.randomChoice(population, 3, false);
+        var genomes = population;//# rng.randomChoice(population, 5, false);
+
+        //        int c = 0;
+        //        for (MOOEvaluatedPhenotype phenotype : genomes) {
+        //            c += 1;
+        //            var best = phenotype;
+        //
+        //            image.savePixelGroupEdgeDisplay(best, "./abc/" + c + "_aref");
+        //            for (int i = 0; i < rounds; i++) {
+        //                Genotype newGenome = new Genotype(best.genome.clone());
+        //                newGenome = mutators.mergeGroupMutation(newGenome, image);
+        //                var newPheotype = this.evaluatedGenotype(newGenome);
+        //
+        ////                image.savePixelGroupEdgeDisplay(newPheotype, "./abc/" + c + "_change_" + i);
+        //                var better = this.dominates(newPheotype, phenotype);
+        //                if (better) {
+        //                    best = newPheotype;
+        //                }
+        //            }
+        //            ret.add(best);
+        //        }
+
+
+        var ret = genomes.stream().parallel().map(mooEvaluatedPhenotype -> {
+            var best = mooEvaluatedPhenotype;
+            //            if (mooEvaluatedPhenotype.pixelGroups.size() == 1) {
+            //                return best;
+            //            }
+            //            for (int i = 0; i < rounds; i++) {
+            //                Genotype newGenome = new Genotype(best.genome.clone());
+            //                newGenome = mutators.mergeGroupMutation(newGenome, image);
+            //                var newPheotype = this.evaluatedGenotype(newGenome);
+            //                var better      = this.dominates(newPheotype, best);
+            //                if (better) {
+            //                    System.out.println("improved");
+            //                    best = newPheotype;
+            //                }
+            //            }
+            return best;
+        }).collect(Collectors.toList());
+
+        return ret;
     }
 
     public void frontsToFile(List<List<MOOEvaluatedPhenotype>> m) {
@@ -123,15 +195,18 @@ public class NSGA2 {
                 System.out.println("File already exists.");
             }
             FileWriter myWriter = new FileWriter("pareto_test.csv");
+            int        front    = 1;
             for (List<MOOEvaluatedPhenotype> f : m) {
                 for (MOOEvaluatedPhenotype f2 : f) {
-                    myWriter.write(String.format("%f, %f, %f, %d\n",
+                    myWriter.write(String.format("%f, %f, %f, %d, %d\n",
                                                  f2.connectivity,
                                                  f2.edgeValue,
                                                  f2.overallDeviation,
-                                                 f2.getRank()
+                                                 f2.getRank(),
+                                                 front
                                                 ));
                 }
+                front += 1;
             }
             myWriter.close();
         } catch (IOException e) {
@@ -197,9 +272,9 @@ public class NSGA2 {
         for (int i = 0; i < numParentPairs; i++) {
             parents.add(Selection.tournamentParentSelection(population, false));
         }
-        //        for (int i = 0; i < 2; i++) {
-        //            parents.add(Selection.randomParentSelection(population));
-        //        }
+        for (int i = 0; i < 2; i++) {
+            parents.add(Selection.randomParentSelection(population));
+        }
         return parents;
     }
 
@@ -315,10 +390,12 @@ public class NSGA2 {
         if (genotype instanceof MOOEvaluatedPhenotype) {
             return (MOOEvaluatedPhenotype) genotype;
         }
-        Phenotype phenotype           = new Phenotype(genotype, image);
-        double    deviation           = criterion.phenotypeOverallDeviation(phenotype) * - 1;
-        double    edgeVal             = criterion.phenotypeEdgeValue(phenotype) * 1;
-        double    connectivityMeasure = criterion.phenotypeConnectivityMeasure(phenotype) * - 1;
+        Phenotype phenotype = new Phenotype(genotype, image);
+        phenotype.genome = phenotype.getThresholdGroupGenome().genome;
+        //        phenotype = new Phenotype(phenotype.getThresholdGroupGenome(), image);
+        double deviation           = criterion.phenotypeOverallDeviation(phenotype);
+        double edgeVal             = criterion.phenotypeEdgeValue(phenotype);
+        double connectivityMeasure = criterion.phenotypeConnectivityMeasure(phenotype);
 
         //        System.out.println();
         //        dbl.log("dev", diviation);
@@ -329,7 +406,27 @@ public class NSGA2 {
         //return new MOOEvaluatedPhenotype(phenotype, rng.nextDouble(), rng.nextDouble(), 0.0);
     }
 
+    //    ExecutorService executorService = Executors.newCachedThreadPool();
+
+
     private List<MOOEvaluatedPhenotype> evaluatedGenotypes(List<Genotype> genotypes) {
+        //        var ret = genotypes.stream()
+        //                           .map(genotype -> executorService.submit(new Callable<MOOEvaluatedPhenotype>() {
+        //                               @Override
+        //                               public MOOEvaluatedPhenotype call() throws Exception {
+        //                                   return evaluatedGenotype(genotype);
+        //                               }
+        //                           }))
+        //                           .map(mooEvaluatedPhenotypeFuture -> {
+        //                               try {
+        //                                   return mooEvaluatedPhenotypeFuture.get();
+        //                               } catch (InterruptedException | ExecutionException e) {
+        //                                   throw new RuntimeException(e);
+        //                               }
+        //                           }).collect(Collectors.toCollection(ArrayList::new));
+        //
+        //
+        //        return ret;
         return new ArrayList<MOOEvaluatedPhenotype>(genotypes.stream().map(this::evaluatedGenotype).toList());
     }
 
@@ -342,9 +439,45 @@ public class NSGA2 {
         return initialPopulation;
     }
 
+    public ArrayList<MOOEvaluatedPhenotype> getMostBest(ArrayList<MOOEvaluatedPhenotype> population) {
+        ArrayList<MOOEvaluatedPhenotype> deviation    = new ArrayList<>(population);
+        ArrayList<MOOEvaluatedPhenotype> edge         = new ArrayList<>(population);
+        ArrayList<MOOEvaluatedPhenotype> connectivity = new ArrayList<>(population);
 
-    //    public List<MOOEvaluatedPhenotype> forceZoneCombination(List<MOOEvaluatedPhenotype> population) {
-    //
-    //
-    //    }
+        deviation.sort(Comparator.comparingDouble(o -> o.overallDeviation));
+        edge.sort(Comparator.comparingDouble(o -> o.edgeValue));
+        connectivity.sort(Comparator.comparingDouble(o -> o.connectivity));
+
+        ArrayList<MOOEvaluatedPhenotype> best    = new ArrayList<>();
+        int                              bestVal = 1000000;
+        for (int i = 0; i < population.size(); i++) {
+            MOOEvaluatedPhenotype phenotype = population.get(i);
+            int indexSum = deviation.indexOf(phenotype) + edge.indexOf(phenotype) + connectivity.indexOf(
+                    phenotype);
+            if (deviation.indexOf(phenotype) < 3 || edge.indexOf(phenotype) < 3 || connectivity.indexOf(phenotype) < 3) {
+                continue;
+            }
+
+            dbl.log("image ", i, " sum:", indexSum, "idx'es:",
+                    deviation.indexOf(phenotype),
+                    edge.indexOf(phenotype),
+                    connectivity.indexOf(phenotype)
+                   );
+            if (indexSum == bestVal) {
+                best.add(phenotype);
+            } else if (indexSum < bestVal) {
+                dbl.log("new most best idx:", i, " sum:", indexSum);
+
+                dbl.log("vals:", phenotype.overallDeviation, phenotype.edgeValue, phenotype.connectivity);
+                best.clear();
+                best.add(phenotype);
+                bestVal = indexSum;
+            }
+
+        }
+        return best;
+
+
+    }
+
 }

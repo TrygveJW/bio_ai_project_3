@@ -164,25 +164,25 @@ public class Image {
 
             BufferedImage bufferedImage = ImageIO.read(imageFile);
 
-            IntStream.range(0, this.height).forEach(value -> {
+            for (int value = 0; value < this.height; value++) {
                 for (int i = 0; i < this.width - 1; i++) {
                     int g1 = phenotype.pixelGroupList[this.getPointAsId(i, value)];
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
 
-                    edgeMap[value][i]     = (g1 != g2) ? 0 : 255;
-                    edgeMap[value][i + 1] = (g1 != g2) ? 0 : 255;
+                    edgeMap[value][i] = (g1 != g2) ? 0 : 255;
                 }
-            });
+            }
+            ;
 
-            IntStream.range(0, this.width).forEach(value -> {
+            for (int value = 0; value < this.width; value++) {
                 for (int i = 0; i < this.height - 1; i++) {
                     int g1 = phenotype.pixelGroupList[this.getPointAsId(value, i)];
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
 
-                    edgeMap[i][value]     = (g1 != g2) ? 0 : 255;
-                    edgeMap[i + 1][value] = (g1 != g2) ? 0 : 255;
+                    edgeMap[i][value] = (g1 != g2) ? 0 : 255;
                 }
-            });
+            }
+            ;
 
             for (int y = 0; y < this.height; y++) {
                 for (int x = 0; x < this.width; x++) {
@@ -194,7 +194,7 @@ public class Image {
                 }
 
             }
-            File csvOutputFile = new File("./out_csv.csv");
+            File csvOutputFile = new File("./out_csv.txt");
             try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
                 for (int y = 0; y < this.height; y++) {
                     pw.println(Arrays.stream(edgeMap[y]).mapToObj(Integer::toString).collect(Collectors.joining(",")));
