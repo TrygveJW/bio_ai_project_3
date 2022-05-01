@@ -8,7 +8,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PhenotypeCombiner {
@@ -60,7 +62,8 @@ public class PhenotypeCombiner {
 
             BufferedImage bufferedImage = ImageIO.read(imageFile);
 
-            int lim = 5;
+            var max_val = Arrays.stream(agrMapX).flatMapToInt(Arrays::stream).max().getAsInt();
+            int lim     = 10;
             IntStream.range(0, image.height).forEach(value -> {
                 for (int i = 0; i < image.width - 1; i++) {
 

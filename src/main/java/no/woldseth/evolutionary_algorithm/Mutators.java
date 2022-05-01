@@ -9,8 +9,7 @@ import no.woldseth.image.Image;
 import no.woldseth.image.Pixel;
 import no.woldseth.image.PixelGroup;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 public class Mutators {
 
@@ -32,17 +31,16 @@ public class Mutators {
             switch (rng.nextInt(1)) {
                 case 0 -> {
 
-                    this.simpleGeneFlipMutation(genotype);
+                    this.mergeGroupMutation(genotype, image);
                 }
                 case 1 -> {
-                    this.horisontalLineMutation(genotype);
+                    //                    this.simpleGeneFlipMutation(genotype);
                 }
                 case 2 -> {
-
-                    this.verticalLineMutation(genotype);
+                    //                    this.verticalLineMutation(genotype);
                 }
                 case 3 -> {
-                    this.mergeGroupMutation(genotype, image);
+                    //                    this.horisontalLineMutation(genotype);
 
                 }
                 default -> {
@@ -111,69 +109,57 @@ public class Mutators {
         }
 
         int numGroups = phenotype.pixelGroups.size();
-
-        //        DebugLogger.dbl().log("num G before", phenotype.pixelGroups.size());
-        //        var preSize = numGroups;
-
-
-        PixelGroup groupToPop = phenotype.pixelGroups.get(rng.nextInt(numGroups));
-        Pixel      startPoint = groupToPop.groupMembers.get(rng.nextInt(groupToPop.groupMembers.size()));
-
-
-        boolean popDown = rng.nextBoolean();
-        int     merge1  = 0;
-        int     merge2  = 0;
-
-        int startId = 0;
-
-        if (popDown) {
-            for (int y = startPoint.getY(); y < image.height - 1; y++) {
-                var g1 = phenotype.pixelGroupList[(y * image.width) + startPoint.getX()];
-                var g2 = phenotype.pixelGroupList[((y + 1) * image.width) + startPoint.getX()];
-
-                if (g1 != g2) {
-                    merge1  = g1;
-                    merge2  = g2;
-                    startId = (y * image.width) + startPoint.getX();
-                    break;
-                }
-            }
-        } else {
-            for (int x = startPoint.getX(); x < image.width - 1; x++) {
-                var g1 = phenotype.pixelGroupList[(startPoint.getY() * image.width) + startPoint.getX()];
-                var g2 = phenotype.pixelGroupList[(startPoint.getY() * image.width) + (startPoint.getX() + 1)];
-
-                if (g1 != g2) {
-                    merge1  = g1;
-                    merge2  = g2;
-                    startId = (startPoint.getY() * image.width) + x;
-                    startId = (startPoint.getY() * image.width) + x;
-                    break;
-                }
-            }
+        if (numGroups == 1) {
+            return genotype;
         }
-        //        System.out.println(Arrays.deepToString(genotype.genome));
-        genotype = new Genotype(mergeGroups(phenotype, merge1, merge2, startId, image));
+        List<Set<Integer>> groupNeighbours = new ArrayList<>();
+
+        for (int i = 0; i < numGroups; i++) {
+            groupNeighbours.add(new HashSet<>());
+        }
+
+        for (int y = 0; y < image.height - 1; y++) {
+            for (int x = 0; x < image.width - 1; x++) {
+
+                int gc     = phenotype.pixelGroupList[image.getPointAsId(x, y)];
+                int gDown  = phenotype.pixelGroupList[image.getPointAsId(x, y + 1)];
+                int gRight = phenotype.pixelGroupList[image.getPointAsId(x + 1, y)];
+                if (gc != gDown) {
+                    groupNeighbours.get(gc).add(gDown);
+                    groupNeighbours.get(gDown).add(gc);
+                } else if (gc != gRight) {
+                    groupNeighbours.get(gc).add(gRight);
+                    groupNeighbours.get(gRight).add(gc);
+                }
+            }
+
+        }
+
+
+        int group1    = rng.nextInt(numGroups);
+        var group2Set = groupNeighbours.get(group1);
+
+        //        System.out.println(groupNeighbours.toString());
+        //        System.out.println(group2Set.toString());
+        int idx2   = (group2Set.size() == 0) ? 0 : rng.nextInt(group2Set.size());
+        int group2 = (int) group2Set.toArray()[idx2];
+
+        genotype = new Genotype(mergeGroups(phenotype,
+                                            group1,
+                                            group2,
+                                            phenotype.pixelGroups.get(group1).groupMembers.get(0).getId(),
+                                            image
+                                           ));
 
         for (int i = 0; i < genotype.genome.length; i++) {
             if (genotype.genome[i] == null) {
 
-                genotype.genome[i] = PixelConnectionType.RIGHT;
-                //                DebugLogger.dbl().log("\n\nnononnnon\n\n");
+                //                        genotype.genome[i] = PixelConnectionType.RIGHT;
+                DebugLogger.dbl().log("\n\nnononnnon\n\n");
                 //                DebugLogger.dbl().log(genotype.genome);
             }
 
         }
-
-        //        System.out.println(Arrays.deepToString(genotype.genome));
-        //        System.exit(0);
-        //        var ph_test  = new Phenotype(new Genotype(genotype.genome), image);
-        //        var postSize = ph_test.pixelGroups.size();
-        //
-        //        if (preSize != postSize) {
-        //            System.out.println("\n\n\nCHANGE\n\n\n\n");
-        //        }
-        //        DebugLogger.dbl().log("num G after", ph_test.pixelGroups.size());
 
         return genotype;
     }

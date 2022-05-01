@@ -63,9 +63,21 @@ public class Selection {
         int                      flip = maximize ? - 1 : 1;
         population.sort((o1, o2) -> flip * o1.compareTo(o2));
 
+        //        System.out.println();
+        //        System.out.println();
+        //        System.out.println();
+        //        for (int i = 0; i < population.size(); i++) {
+        //            System.out.println(population.get(i).fitness);
+        //        }
+
         for (int i = 0; i < goalSize; i++) {
             ret.add(population.get(i));
         }
+
+        //        System.out.println();
+        //        for (int i = 0; i < ret.size(); i++) {
+        //            System.out.println(ret.get(i).fitness);
+        //        }
 
         return ret;
     }

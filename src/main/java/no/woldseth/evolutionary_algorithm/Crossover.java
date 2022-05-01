@@ -22,6 +22,9 @@ public class Crossover {
 
     public Genotype crossoverParents(Genotype parent1, Genotype parent2) {
         Genotype child;
+
+        //        child = this.uniformCrossover(parent1, parent2, 0.5);
+
         switch (rng.nextInt(2)) {
             case 0 -> {
                 child = this.twoPointCross2d(parent1, parent2);
