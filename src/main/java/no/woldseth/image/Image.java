@@ -157,7 +157,7 @@ public class Image {
         }
     }
 
-    public void savePhenotypeAsCsv(Phenotype phenotype) {
+    public void savePhenotypeAsCsv(Phenotype phenotype, String filepath) {
         int[][] edgeMap = new int[this.height][this.width];
         try {
             Color borderColor = Color.magenta;
@@ -170,7 +170,7 @@ public class Image {
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(i + 1, value)];
 
                     edgeMap[value][i]     = (g1 != g2) ? 0 : 255;
-                    edgeMap[value][i + 1] = (g1 != g2) ? 0 : 255;
+                    //edgeMap[value][i + 1] = (g1 != g2) ? 0 : 255;
                 }
             });
 
@@ -180,7 +180,7 @@ public class Image {
                     int g2 = phenotype.pixelGroupList[this.getPointAsId(value, i + 1)];
 
                     edgeMap[i][value]     = (g1 != g2) ? 0 : 255;
-                    edgeMap[i + 1][value] = (g1 != g2) ? 0 : 255;
+                    //edgeMap[i + 1][value] = (g1 != g2) ? 0 : 255;
                 }
             });
 
@@ -194,13 +194,13 @@ public class Image {
                 }
 
             }
-            File csvOutputFile = new File("./out_csv.csv");
+            File csvOutputFile = new File(filepath + ".txt");
             try (PrintWriter pw = new PrintWriter(csvOutputFile)) {
                 for (int y = 0; y < this.height; y++) {
                     pw.println(Arrays.stream(edgeMap[y]).mapToObj(Integer::toString).collect(Collectors.joining(",")));
                 }
             }
-            System.out.println(csvOutputFile.exists());
+            //System.out.println(csvOutputFile.exists());
 
         } catch (Exception e) {
             e.printStackTrace();

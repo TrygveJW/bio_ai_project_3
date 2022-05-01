@@ -40,16 +40,14 @@ public class Criterion {
                                                      ) + Math.pow(pixel.getGreen() - avgGreen, 2) + Math.pow(
                              pixel.getBlue() - avgBlue, 2)))
                      .mapToDouble(Double::doubleValue)
-                     .average()
-                     .getAsDouble();
+                     .sum();
     }
 
     public double phenotypeOverallDeviation(Phenotype phenotype) {
         return phenotype.pixelGroups.stream()
                                     .map(this::pixelGroupRgbDist)
                                     .mapToDouble(Double::doubleValue)
-                                    .average()
-                                    .getAsDouble();
+                                    .sum();
     }
 
     public double phenotypeEdgeValue(Phenotype phenotype) {
