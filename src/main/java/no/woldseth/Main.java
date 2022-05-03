@@ -40,7 +40,7 @@ public class Main {
             
 
             NSGA2 peeop    = new NSGA2(50, 20, 2, 0.1, 0.8, image);
-            var   skadoosh = peeop.runGenalg(50);
+            var   skadoosh = peeop.runGenalg(1);
 
 
             //NSGA2 peeop    = new NSGA2(50, 2, 2, 0.3, 0.8, image);

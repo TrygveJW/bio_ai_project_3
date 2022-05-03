@@ -129,7 +129,6 @@ public class NSGA2 {
         //        var paretoFront = fastNonDominatedSort(population).get(0);
         // TODO: 28/04/2022 Fiks resten her Axel
         System.out.println(fronts.get(0).get(0).connectivity);
-        System.out.println("skadoosh");
         frontsToFile(fronts);
         return bruteForceLast(population, 50);
     }
@@ -188,25 +187,27 @@ public class NSGA2 {
             crowdingDistanceAssignment(front);
         }
         try {
-            File myObj = new File("pareto_test.csv");
+            File myObj = new File("pareto_fitness.csv");
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
             } else {
                 System.out.println("File already exists.");
             }
-            FileWriter myWriter = new FileWriter("pareto_test.csv");
-            int        front    = 1;
+            FileWriter myWriter = new FileWriter("pareto_fitness.csv");
+            myWriter.write("number, connectivity, edgevalue, deviation, front\n");
+            int        frontCounter    = 1;
             for (List<MOOEvaluatedPhenotype> f : m) {
                 for (MOOEvaluatedPhenotype f2 : f) {
-                    myWriter.write(String.format("%f, %f, %f, %d, %d\n",
+                    myWriter.write(String.format("%d, %f, %f, %f, %d \n",
+                                                 frontCounter,
                                                  f2.connectivity,
                                                  f2.edgeValue,
                                                  f2.overallDeviation,
-                                                 f2.getRank(),
-                                                 front
+                                                 f2.getRank()
                                                 ));
+                    frontCounter += 1;
                 }
-                front += 1;
+
             }
             myWriter.close();
         } catch (IOException e) {
