@@ -81,20 +81,41 @@ public class Main {
 
     private static void SGA() {
 
-        File imagefp = new File("./training_images/training_images/176039/Test image.jpg");
-        //File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
-        //        File imagefp = new File("./training_images/training_images/86016/Test image.jpg");
+        String imgNum  = "118035";
+        File   imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
 
-        //        File imagefp = new File("./training_images/training_images/118035/Test image.jpg");
-        //        File imagefp = new File("./training_images/training_images/test/test_img.png");
-        //        File imagefp = new File("./training_images/training_images/test/test_img_shitty_compressed.jpg");
         try {
             Image image = new Image(imagefp);
 
+            double deviationWeight    = 0.0002;
+            double edgeValWeight      = 8;
+            double connectivityWeight = 1;
 
-            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50, 5, 2, 0.2, 0.8, image);
-            var                     ph                = genteticAlgorithm.runGenalg(50);
-            image.savePixelGroupEdgeDisplay(ph, "./out_img");
+            SimpleGenteticAlgorithm genteticAlgorithm = new SimpleGenteticAlgorithm(50,
+                                                                                    5,
+                                                                                    2,
+                                                                                    0.2,
+                                                                                    0.8,
+                                                                                    image,
+                                                                                    deviationWeight,
+                                                                                    edgeValWeight,
+                                                                                    connectivityWeight
+            );
+
+            var best = genteticAlgorithm.runGenalg(50);
+
+
+            int counter = 0;
+
+
+            for (Phenotype p : best) {
+                image.savePixelGroupEdgeDisplay(p, "./pareto_front_img/imgNum" + counter);
+                image.saveGroundTruthImage(p, "./pareto_front_type2/img2Num" + counter);
+                image.savePhenotypeAsCsv(p, "./pareto_front_txt/txtNum" + counter);
+                counter++;
+            }
+            System.out.println("Evaluating images, please wait...");
+            evaluateFront(imgNum);
 
 
         } catch (FileNotFoundException e) {
