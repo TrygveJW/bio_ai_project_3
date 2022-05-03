@@ -20,13 +20,20 @@ public class Main {
     private static DebugLogger dbl = new DebugLogger(true);
 
     public static void main(String[] args) {
-
+        Phenotype.threshold                = 300;
+        Initialization.initializationFlips = 100;
         NSGA();
         //        SGA();
     }
 
     private static void NSGA() {
-        String imgNum = "118035";
+        String imgNum = "118035";  // church thingy
+        //        String imgNum = "86016"; // grass ring
+        //        String imgNum = "147091"; // Tree against sky
+        //        String imgNum = "176035"; // river
+        //        String imgNum = "176039"; // clouds
+        //        String imgNum = "353013"; // tree in vase
+
         File imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
 
         //        File imagefp = new File("./training_images/test/test_img.png");
@@ -81,13 +88,19 @@ public class Main {
 
     private static void SGA() {
 
-        String imgNum  = "118035";
-        File   imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
+        //        String imgNum = "118035";  // church thingy
+        //        String imgNum = "86016"; // grass ring
+        //        String imgNum = "147091"; // Tree against sky
+        //        String imgNum = "176035"; // river
+        //        String imgNum = "176039"; // clouds
+        String imgNum = "353013"; // tree in vase
+
+        File imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
 
         try {
             Image image = new Image(imagefp);
 
-            double deviationWeight    = 0.0002;
+            double deviationWeight    = 0.002;
             double edgeValWeight      = 8;
             double connectivityWeight = 1;
 
