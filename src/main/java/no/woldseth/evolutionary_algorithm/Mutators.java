@@ -30,11 +30,11 @@ public class Mutators {
 
             switch (rng.nextInt(1)) {
                 case 0 -> {
+                    this.simpleGeneFlipMutation(genotype);
 
-                    this.mergeGroupMutation(genotype, image);
                 }
                 case 1 -> {
-                    //                    this.simpleGeneFlipMutation(genotype);
+                    //                    this.mergeGroupMutation(genotype, image);
                 }
                 case 2 -> {
                     //                    this.verticalLineMutation(genotype);

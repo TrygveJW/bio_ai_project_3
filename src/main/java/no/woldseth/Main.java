@@ -27,7 +27,7 @@ public class Main {
     }
 
     private static void NSGA() {
-        String imgNum = "118035";  // church thingy
+        String imgNum = "86016";  // church thingy
         //        String imgNum = "86016"; // grass ring
         //        String imgNum = "147091"; // Tree against sky
         //        String imgNum = "176035"; // river
@@ -46,13 +46,8 @@ public class Main {
                         //System.exit(0);
             
 
-            NSGA2 peeop    = new NSGA2(50, 20, 2, 0.1, 0.8, image);
-            var   skadoosh = peeop.runGenalg(1);
-
-
-            //NSGA2 peeop    = new NSGA2(50, 2, 2, 0.3, 0.8, image);
-            //var   skadoosh = peeop.runGenalg(100);
-
+            NSGA2 peeop    = new NSGA2(50, 20, 2, 0.07, 0.95, image);
+            var   skadoosh = peeop.runGenalg(2);
 
 
             int counter = 0;
