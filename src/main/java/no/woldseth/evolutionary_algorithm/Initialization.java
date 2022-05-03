@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 
 public class Initialization {
     private static Random rng = new Random();
+    public static int initializationFlips = 100;
 
     public static Genotype generateInitialGenome(Image image) {
         //        PixelConnectionType[] genome = Arrays.stream(image.pixleArray)
@@ -22,7 +23,7 @@ public class Initialization {
 
         PixelConnectionType[] genome = PrimsAlgorithm.getSpanningTree(image);
         Random                rng    = new Random();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < initializationFlips; i++) {
             //            genome[rng.nextInt(genome.length)] = PixelConnectionType.values()[rng.nextInt(PixelConnectionType.values().length)];
             genome[rng.nextInt(genome.length)] = PixelConnectionType.SELF;
 
