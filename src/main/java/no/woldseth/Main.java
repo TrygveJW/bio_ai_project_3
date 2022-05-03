@@ -36,8 +36,10 @@ public class Main {
 
         File imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
 
-        //        File imagefp = new File("./training_images/test/test_img.png");
-        //        File imagefp = new File("./training_images/test/test_img_shitty_compressed.jpg");
+        clearDir(new File("./pareto_front_img"));
+        clearDir(new File("./pareto_front_type2"));
+        clearDir(new File("./pareto_front_txt"));
+
         try {
             Image image = new Image(imagefp);
 
@@ -91,6 +93,10 @@ public class Main {
         String imgNum = "353013"; // tree in vase
 
         File imagefp = new File("./training_images/" + imgNum + "/Test image.jpg");
+
+        clearDir(new File("./pareto_front_img"));
+        clearDir(new File("./pareto_front_type2"));
+        clearDir(new File("./pareto_front_txt"));
 
         try {
             Image image = new Image(imagefp);
@@ -191,5 +197,15 @@ public class Main {
             }
         }
         return counter/ Math.max(numberOfBlackPixels, 1);
+    }
+
+    private static void clearDir(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                f.delete();
+            }
+        }
+
     }
 }
