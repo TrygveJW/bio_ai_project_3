@@ -44,11 +44,12 @@ public class Criterion {
     }
 
     public double phenotypeOverallDeviation(Phenotype phenotype) {
+
         return - phenotype.pixelGroups.stream()
-                                      .map(this::pixelGroupRgbDist)
-                                      .mapToDouble(Double::doubleValue)
-                                      .sum();
-        //                                    .getAsDouble();
+                                    .map(this::pixelGroupRgbDist)
+                                    .mapToDouble(Double::doubleValue)
+                                    .sum();
+
     }
 
     public double phenotypeEdgeValue(Phenotype phenotype) {
@@ -136,6 +137,7 @@ public class Criterion {
                             newY -= 1;
                             weight = 1;
                         }
+                        default -> {throw new RuntimeException();}
                     }
 
                     if ((newX >= image.width || newX < 0) || (newY >= image.height || newY < 0)) {

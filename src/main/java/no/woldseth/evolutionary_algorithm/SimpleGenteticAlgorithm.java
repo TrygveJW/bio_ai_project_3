@@ -29,12 +29,20 @@ public class SimpleGenteticAlgorithm {
     private Mutators mutators;
     private Crossover crossover;
 
+
+    private double deviationWeight;
+    private double edgeValWeight;
+    private double connectivityWeight;
+
     public SimpleGenteticAlgorithm(int populationSize,
                                    int numParentPairs,
                                    int numChildrenPerParentPair,
                                    double mutationChance,
                                    double crossChance,
-                                   Image image) {
+                                   Image image,
+                                   double deviationWeight,
+                                   double edgeValWeight,
+                                   double connectivityWeight) {
         this.populationSize           = populationSize;
         this.numParentPairs           = numParentPairs;
         this.numChildrenPerParentPair = numChildrenPerParentPair;
@@ -44,6 +52,9 @@ public class SimpleGenteticAlgorithm {
         this.criterion                = new Criterion(image);
         this.mutators                 = new Mutators(image);
         this.crossover                = new Crossover(image);
+        this.deviationWeight          = deviationWeight;
+        this.edgeValWeight            = edgeValWeight;
+        this.connectivityWeight       = connectivityWeight;
     }
 
     private void printPopInfo(List<EvaluatedPhenotype> pop, int generation) {
@@ -61,7 +72,7 @@ public class SimpleGenteticAlgorithm {
 
     }
 
-    public Phenotype runGenalg(int numGenerations) {
+    public List<EvaluatedPhenotype> runGenalg(int numGenerations) {
         // gen inital pop
         List<EvaluatedPhenotype> population = this.evaluatedGenotypes(genInitialPopulation());
 
@@ -85,17 +96,7 @@ public class SimpleGenteticAlgorithm {
         population.sort(Comparator.naturalOrder());
         int lastIdx = population.size() - 1;
         this.displayEval(population.get(lastIdx));
-        return population.get(lastIdx);
-        //        image.savePixelGroupEdgeDisplay(population.get(0));
-        //
-        //        for (int i = 0; i < image.height; i++) {
-        //            System.out.println(Arrays.toString(Arrays.copyOfRange(population.get(0).pixelGroupList,
-        //                                                                  i * image.width,
-        //                                                                  (i + 1) * image.width
-        //                                                                 )));
-        //
-        //
-        //        }
+        return population.subList(lastIdx - 5, lastIdx);
     }
 
     private List<Selection.ParentPair> getParentPairs(List<EvaluatedPhenotype> population) {
@@ -141,10 +142,6 @@ public class SimpleGenteticAlgorithm {
         return children;
     }
 
-
-    private double deviationWeight = 0.0002;
-    private double edgeValWeight = 8;
-    private double connectivityWeight = 1;
 
     private EvaluatedPhenotype evaluatedGenotype(Genotype genotype) {
         if (genotype instanceof EvaluatedPhenotype) {

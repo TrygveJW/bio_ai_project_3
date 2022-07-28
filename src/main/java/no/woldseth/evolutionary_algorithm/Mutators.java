@@ -30,16 +30,18 @@ public class Mutators {
 
             switch (rng.nextInt(1)) {
                 case 0 -> {
-                    this.mergeGroupMutation(genotype, image);
+                    this.simpleGeneFlipMutation(genotype);
+
                 }
                 case 1 -> {
-                    //                    this.simpleGeneFlipMutation(genotype);
+                    //                    this.mergeGroupMutation(genotype, image);
                 }
                 case 2 -> {
                     //                    this.verticalLineMutation(genotype);
                 }
                 case 3 -> {
                     //                    this.horisontalLineMutation(genotype);
+
                 }
                 default -> {
                     throw new RuntimeException();

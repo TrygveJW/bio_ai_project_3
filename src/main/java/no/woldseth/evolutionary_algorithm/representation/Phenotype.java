@@ -32,7 +32,7 @@ public class Phenotype extends Genotype {
         purgeSmallGroups();
     }
 
-    private int threshold = 100;
+    public static int threshold = 100;
 
     private void purgeSmallGroups() {
         List<Set<Integer>> groupNeighbours = new ArrayList<>();
